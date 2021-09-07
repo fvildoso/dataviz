@@ -1,0 +1,60 @@
+svg {
+    height: 250px;
+    width: 800px;
+    border: 1px solid gray;
+}
+
+text {
+    font-size: 10px;
+}
+
+g > text.active {
+    font-size: 30px;
+}
+
+.circle_blanco {
+    fill: white;
+    stroke: black;
+    stroke-width: 1px;
+}
+
+circle {
+    fill: purple;
+    stroke: black;
+    stroke-width: 1px;
+}
+
+circle.active {
+    fill: red;
+}
+
+circle.inactive {
+    fill: gray;
+}
+
+.highlight {
+    font-size: 24px;
+}
+
+#modal {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 1;
+    background: white;
+    border: 1px black solid;
+    box-shadow: 10px 10px 5px #888888;
+    width: 400px;
+}
+
+tr {
+    border: 1px gray solid;
+}
+
+td {
+    font-size: 10px;
+}
+
+td.data {
+    font-weight: 900;
+}
