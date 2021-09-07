@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    let array_data = [
+        {x: 1, y: 3}
+    ]
+
+    function f(x) {
+        return x * 2
+    }
+
+    for (let i = 0; i < 9; i++) {
+        array_data.push({x: i, y: f(i)})
+    }
+
+    console.log(array_data)
+
+</script>
+</body>
+</html>

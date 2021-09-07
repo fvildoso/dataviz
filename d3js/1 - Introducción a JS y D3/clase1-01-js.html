@@ -1,0 +1,207 @@
+<!--esta es la estrucutra basica de un codigo html-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--    esto es lo que vemos en la pestaña de la pagina-->
+    <title>D3.js - Introducción JS</title>
+
+    <!--    esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--    declaramos el charset que utilizaremos, es muy raro que usen alguno distinto-->
+    <meta charset="utf-8"/>
+</head>
+<body>
+
+<!--en esta etiqueta escribiremos nuestro codigo js-->
+<script type="text/javascript">
+
+    /*
+    Operaciones Basicas de JavaScript
+    */
+    console.log("%cOperaciones Basicas de JavaScript", "color:blue; font-size:20px");
+
+    // esto tmb es un comentario
+
+    // aqui declaramos una variable, no es necesario especificar de que tipo es
+    var mensaje = 'este es el mejor curso del universo 🙃';
+
+    // se muestra en la consola, pero en qué consola?
+    console.log("Mensaje Inicial=" + mensaje)
+
+    //tmb con javascript más modernos podemos distinguir dos tipos
+
+    // una constante que no variará
+    const constante = 1;
+    console.log("Constante=" + constante)
+
+    // una que si pueda cambiar
+    let variablequevaria = "jgkfdjkgdf";
+    console.log("Variable=" + variablequevaria)
+
+    //mejor consejo de la vida, es hacer un console.log , asi pueden ir viendo que valor van tomando las variables
+    console.log("jajajaja");
+
+    //pueden concatener sumando
+    console.log("Mi Mensaje: " + mensaje);
+
+    // declaramos una variable sin asignarle ningun valor
+    var div;
+
+    // podemos especificar un decimal
+    var numero = 12.34;
+
+    //incluso podriamos no declarar la variable e igual la usará xd DATO FREAK
+    numero_dos = 123
+
+    //esto será sumado?
+    console.log("Mi suma: " + numero + numero_dos);
+
+    // y esto?
+    console.log("Mi suma: " + (numero + numero_dos));
+
+    //aqui la multiplicacion tiene prioridad
+    console.log("Multiplicación: " + 2 * 2);
+
+    //otras operaciones
+    console.log("Potencia: " + Math.pow(2, 10));
+    console.log("Raíz: " + Math.sqrt(2));
+    console.log("Valor Absoluto: " + Math.abs(-10));
+
+
+    //podemos hacer if/else
+    if (true) {
+        console.log("holi, siempre llego acá")
+    } else {
+        console.log("eso no sirve xd porque nunca llego")
+    }
+
+    // alguien ha usado json?
+    //json = javascript object notation
+    // https://jsoneditoronline.org/#right=cloud.eb74da4402a64694b6657ededd352a4c&left=cloud.f7159b5716b440458a949823beeda948
+
+    //array
+    soy_array = [4, 5, 6];
+
+    //con esto podemos recorrer el array
+    //la funcion que está adentro del forEach, se aplicará a cada uno de los elementos que estamos recorriendo
+    //la referencia "d" da lo mismo, puede ser cualquier cosa, simplemente hace referencia al elemento que estamos recorriendo
+    soy_array.forEach(function (hola) {
+        console.log("soy_array: " + hola);
+    });
+
+    //podemos darle un segundo parametro a la funcion, y ese parametro hará referencia a la posicion dentro del array
+    soy_array.forEach(function (d, i) {
+        console.log("soy_array: " + d + ". En el elemento: " + i);
+    });
+
+    //podemos agregarle elementos a un array hacuendole un push
+    soy_array.push(1);
+
+    //tmb podemos imprimir el array completo usando console.log
+    console.log(soy_array);
+
+    //ahora declaramos un json
+    soy_json = {nombre: "Pipe", edad: 32};
+
+    //podemos hacerle un console.log
+    console.log("Mi nombre: " + soy_json.nombre);
+
+    console.log("%cFunciones de JavaScript", "color:blue; font-size:20px");
+
+    //esto es una funcion sin argumentos
+    function gimme() {
+        // siempre que se llame esta funcion le agregará un 8 al array
+        soy_array.push(8);
+        console.log("agreamos un 8 a nuestro array")
+    }
+
+    //llamamos la funcion
+    gimme();
+
+    //vemos como cambió el array
+    console.log(soy_array);
+
+    console.log("%cCallbacks", "color:blue; font-size:20px");
+
+    // advertencia
+    // ahora viene lo mas extraño de javascript!
+    // ＼（〇_ｏ）／
+
+
+    //hacemos una funcion que simplemente imprime en la consola
+    function a() {
+        console.log('a: esto va primero');
+    }
+
+    //hacemos otra funcion que simplemente escribe en la consola
+    function b() {
+        console.log('b: esto va segundo');
+    }
+
+    //quien aparece primero?
+    a();
+    b();
+
+    //que pasa si hacemos que una funcion responda mas lento aproposito
+    function c() {
+
+        //set time out nos permite ejecutar la funcion que está adentro en un determinado tiempo
+        setTimeout(function () {
+
+            //hacemos un print a los 3 segundos
+            console.log('c: espera 3 segundos');
+
+        }, 3000);
+
+    }
+
+    //hacemos una funcion que d que solo imprime
+    function d() {
+        console.log('d: esto va segundo, pero sale primero 😱');
+    }
+
+    //cual se executará primero?
+    c();
+    d();
+
+    // ¿que hacemos si queremos garantizar que algo ocurra despues de otra evento?
+
+    //creamos una funcion que recibirá dos "variables", se le llama callback, porque es lo que quieres que se llame despues
+    function e(mensaje, callback) {
+
+        setTimeout(function () {
+            //imprimimos el mensaje
+            console.log(mensaje);
+
+            //si existe callback, lo executamos
+            callback && callback();
+
+            /* es lo mismo que la linea de arriba
+            if (callback) {
+                callback();
+            }
+            */
+        }, 3000);
+    }
+
+    //funciona que simplemente usa console.log
+    function f() {
+        console.log('esto es el callback, y deberia ser lo utlimo en aparecer');
+    }
+
+    //llamamos la funcion e
+    e("sin callback");
+
+    //llamamos la funcion con un callback, asi garantizamos que f se ejecute despues de e
+    e("con callback", f)
+
+    /*
+    Fin de Operaciones Basicas de JavaScript
+    */
+
+    console.log("%c🙂", "color:blue; font-size:20px");
+
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>D3.js - Componentes de un Gráfico</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--    cargamos la libreria de d3 que vamos a usar-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- legendas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+
+    <!--    <link href="https://fonts.googleapis.com/css?family=Libre+Caslon+Text&display=swap" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <style>
+        .tick line {
+            opacity: 0.1;
+        }
+    </style>
+
+</head>
+<body>
+<div id="viz">
+    <svg width="1000" height="1000"></svg>
+</div>
+
+<script type="text/javascript">
+
+    //definimos colores
+    const blue = "#227afe", orange = "#e37b2a";
+    console.log(blue);
+
+    //escalas lineales
+    let miEscalaX = d3.scaleLinear().domain([1, 10]).range([0, 400]);
+    let miEscalaY = d3.scaleLinear().domain([1, 10]).range([400, 0]);
+
+    //la probamos
+    console.log("miEscalaX(5)=" + miEscalaX(5));
+
+    // mi primer eje, no lo dibuja, es solo la configuración
+    let xMiEje = d3.axisBottom()
+        .scale(miEscalaX)
+        .tickSize(15) //largo de los tick
+
+    //finalmente aqui dibujamos el eje x
+    //los ejes se pueden trasladar
+    d3.select("svg")
+        .append("g") //es parte de un grupo
+        .attr("id", "xMiEje")
+        .attr("transform", "translate(" + 50 + "," + 450 + ")")
+        .style("font-size", "20px")
+        .style("font-family", "Libre Baskerville")
+        .call(xMiEje);
+
+    //mi primer eje
+    let yMiEje = d3.axisLeft()
+        .scale(miEscalaY)
+        .tickSize(15);
+
+    //finalmente aqui dibujamos el eje x
+    //los ejes se pueden trasladar
+    d3.select("svg")
+        .append("g") //es parte de un grupo
+        .attr("id", "yMiEje")
+        .style("font-size", "20px")
+        .style("font-family", "Libre Baskerville")
+        .attr("transform", "translate(" + 50 + "," + 50 + ")")
+        .call(yMiEje);
+
+    //veamos que tiene la data
+    //luego que se carga, se envia los datos a la funcion lineChart
+    d3.csv("tweetdata.csv")
+        .then(function (data) {
+            lineChart(data)
+        });
+
+    function lineChart(data) {
+
+        //ahora vamos a mostrar los puntos
+        //ojo que para mover un circle se usa cx y cy
+        d3.select("svg")
+            .selectAll("circle.tweets")
+            .data(data).enter()
+            .append("circle")
+            .attr("class", "tweets")
+            .attr("r", 5)
+            .attr("cx", function (d) {
+                return miEscalaX(d.day)
+            })
+            .attr("cy", function (d) {
+                return miEscalaY(d.tweets)
+            })
+            .style("fill", orange)
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
+
+        //sintaxis moderna
+        let tweetLine = d3.line()
+            .x(d => {
+                return miEscalaX(d.day)
+            })
+            .y(d => miEscalaY(d.tweets));
+
+        tweetLine.curve(d3.curveLinear);
+
+        //como siempre, aqui es donde realmente se dibuja
+        d3.select("svg")
+            .append("path")
+            .attr("d", tweetLine(data))
+            .attr("fill", "none")
+            .attr("stroke", orange)
+            .attr("stroke-width", "2px")
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
+
+        //usamos el plugin legend
+        let fillScale = d3.scaleOrdinal()
+            .domain(["tweets"])
+            .range([orange])
+
+        let legendA = d3.legendColor().scale(fillScale)
+        d3.select("svg")
+            .append("g")
+            .style("font-size", '20px')
+            .attr("transform", "translate(450, 100)")
+            .style("font-family", "Libre Caslon Text")
+            .call(legendA)
+
+
+        //BONUS https://github.com/d3/d3-transition
+
+        d3.select('svg')
+            .selectAll('circle.tweets')
+            .on("mouseover", mouseOverCircle)
+            .on("mouseout", mouserOutCircle)
+
+        function mouseOverCircle() {
+            const pinkColor = d3.rgb("pink");
+
+            d3.select('svg')
+                .selectAll('circle.tweets')
+                .transition()
+                .attr('r', '5')
+                .style("fill", orange);
+
+            d3.select(this)
+                .transition()
+                .attr('r', '20')
+                .style("fill", pinkColor);
+        }
+
+        function mouserOutCircle() {
+            d3.select('svg')
+                .selectAll('circle.tweets')
+                .transition()
+                .attr('r', '5')
+                .style("fill", orange);
+        }
+    }
+
+</script>
+</body>
+</html>

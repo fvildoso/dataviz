@@ -1,0 +1,183 @@
+<!--esta es la estrucutra basica de un codigo html-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--    esto es lo que vemos en la pestaña de la pagina-->
+    <title>D3.js - Introducción D3.js</title>
+
+    <!--    declaramos el charset que utilizaremos, es muy raro que usen alguno distinto-->
+    <meta charset="utf-8"/>
+
+    <!--    esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--    cargamos la libreria de d3 que vamos a usar-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+<!--en las etiquetas svg quedará el codigo, tmb se pueden usar unas que se llaman canvas, pero esas no son vectoriales-->
+<svg id="mi-id" class="mi-clase" width="1000" height="1000"></svg>
+
+<script type="text/javascript">
+
+    /*
+    Hola D3.js
+    */
+
+    // d3 es una libreria de javascript, que nos facilitará trabajar con elementos que nos permitirán hacer las visualizaciones
+    //cuando hablamos de elemento, nos referimos a cualquier cosa, numeros, lineas, rectangulos, circulos, imagenes, etc...
+
+    //partiremos haciendo un rectangulo
+    //https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect
+
+    d3.select("svg") //llamamos a d3 y seleccionamos el svg que creamos al inicio del html
+        .append("rect") //agregamos elemento rect al svg
+        .attr("width", "100") //le damos los atributos que queremos
+        .attr("height", "100")
+        .attr("x", "50")
+        .attr("y", "300") //OJO!!!
+        .attr("rx", "15")
+        .attr("ry", "15")
+
+    //¡OJO!
+    //notar como se comporta el eje y de posición
+
+    //ahora vamos a asignar lo que creamos a una variable, sel
+    let sel = d3.select("svg") //seleccionamos el svg
+        .selectAll("rect") //seleccionamos todos los rect que hay en el svg
+
+    //vamos a esperar un segundo, y cambiaremos los atributos de los rect, en este caso solo 1
+    setTimeout(function () {
+        sel
+            .attr("width", "100")
+            .attr("height", "500")
+            .attr("x", "50")
+            .attr("y", "50")
+            .attr("rx", "15")
+            .attr("ry", "15")
+
+    }, 1000);
+
+    //luego lo borramos cuando pasan dos segundos
+    setTimeout(function () {
+        sel.remove()
+    }, 2000);
+
+    //usamos d3.json para leer un json que esté en alguna direccion
+    d3.json("https://jsonplaceholder.typicode.com/todos/1")
+        .then(function (response) {
+            //response podría haber sido cualquier otra cosa, como en el forEach
+            console.log(response);
+            console.log(response.title)
+        })
+
+
+    //podemos crear una funcion para pasarla en d3.csv o d3.json
+    function do_nothing() {
+        console.log("well.. I actually do something 🤣");
+    }
+
+    //funcion para tener un numero random entre dos numeros
+    function random(x, y) {
+        return Math.floor(Math.random() * y) + x
+    }
+
+    //funcion para generar un vector con numeros random
+    function random_array(x, y, z) {
+        var a = [];
+        for (i = 0; i < z; i++) {
+            a.push(random(x, y))
+        }
+        return a;
+    }
+
+    //leemos el csv de avocado y pasamos la data a la funcion do nothing, aunque no hace nada con la data
+    // d3.csv("avocado.csv")
+    //     .then(function (response) {
+    //         console.log("estoy adentro del comando que lee csv")
+    //         do_nothing();
+    //     });
+
+    // hacemos una funcion que si hará algo
+    function do_something(data) {
+
+        let array_azar = random_array(10, 100, 10)
+        console.log("vamos a generar un array random")
+        console.log(array_azar)
+
+        // esto es lo mas complejo de entender en d3
+        // d3.select("svg")
+        //     .selectAll("rect.random")
+        //     .data(array_azar)
+        //     .enter()
+        //     .append("rect")
+        //     .attr("class", "random")
+        //     .attr("width", 50)
+        //     .attr("height", function (d) {
+        //         return d;
+        //     })
+        //     .attr("x", function (d, i) {
+        //         return i * 60;
+        //     })
+        //     .attr("y", function (d) {
+        //         return 500 - d;
+        //     })
+        //     .attr("rx", "15")
+        //     .attr("ry", "15")
+
+        //un rectangulo no puede tener labels.
+        // d3.select("svg")
+        //     .selectAll("rect")
+        //     .data(array_azar)
+        //     .enter().append("rect")
+        //     .attr("width", 50)
+        //     .attr("height", function (d) {
+        //         // console.log(d)
+        //         return d;
+        //     })
+        //     .style("fill", "#561255")
+        //     .style("stroke", "pink")
+        //     .style("stroke-width", "1px")
+        //     .style("opacity", .55)
+        //     .attr("x", function (d, i) {
+        //         return i * 40
+        //     });
+
+        //necesitamos "g" para tener labels
+        let svgG = d3.select("svg")
+            .selectAll("g")
+            .data(array_azar)
+            .enter()
+            .append("g")
+            .attr("transform", function (d, i) {
+                return "translate(" +
+                    (i * 100) + "," + (100)
+                    + ")";
+            });
+
+        svgG.append("rect")
+            .attr("width", 50)
+            .attr("height", function (d) {
+                return d;
+            })
+            .style("fill", "blue")
+            .style("stroke", "red")
+            .style("stroke-width", "1px")
+            .style("opacity", .25)
+
+        svgG.append("text")
+            .style("font-size", "20px")
+            .text(function (d) {
+                return d;
+            })
+            .attr("y", function (d) {
+                return d;
+            });
+    }
+
+    do_something();
+
+</script>
+</body>
+</html>

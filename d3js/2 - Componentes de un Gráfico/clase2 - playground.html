@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>D3.js - Componentes de un Gráfico</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--    cargamos la libreria de d3 que vamos a usar-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- legendas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+
+    <!--    <link href="https://fonts.googleapis.com/css?family=Libre+Caslon+Text&display=swap" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <style>
+        .tick line {
+            opacity: 0.1;
+        }
+    </style>
+
+</head>
+<body>
+<div id="viz">
+    <svg width="1000" height="1000"></svg>
+</div>
+
+<script type="text/javascript">
+
+    //definimos colores
+    const blue = "#227afe", green = "#71c55e", orange = "#e37b2a";
+    console.log(blue);
+
+    //escalas lineales
+    let miEscalaX = d3.scaleLinear().domain([0, 10]).range([0, 200]);
+    let miEscalaY = d3.scaleLinear().domain([0, 10]).range([200, 0]);
+
+    //la probamos
+    console.log("miEscalaX(5)=" + miEscalaX(5));
+
+    //axisTop, los tick son hacia arriba
+    //axisRight
+    //axisBottom, los tick son hacia abajo
+    //axisLeft
+
+    // mi primer eje, no lo dibuja, es solo la configuración
+    let xMiEje = d3.axisBottom()
+        .scale(miEscalaX)
+        .tickSize(250) //largo de los tick
+        .tickValues([1, 2, 3, 5, 7, 9, 10]); //solo números
+
+    // let xMiEje = d3.axisTop()
+    //     .scale(miEscalaX)
+    //     .tickSize(200)
+    //     .tickValues([1, 5, 7]);
+
+    //podemos ver que es lo que tiene nuestra variable
+    console.log(xMiEje); //algo feo D: !
+
+    //finalmente aqui dibujamos el eje x
+    //los ejes se pueden trasladar
+    d3.select("svg")
+        .append("g") //es parte de un grupo
+        .attr("id", "xMiEje")
+        .attr("transform", "translate(" + 50 + "," + 50 + ")")
+        .style("font-size", "20px")
+        .style("font-family", "Libre Baskerville")
+        .call(xMiEje);
+
+    //mi primer eje
+    let yMiEje = d3.axisRight()
+        .scale(miEscalaY)
+        .tickSize(200);
+
+    //finalmente aqui dibujamos el eje x
+    //los ejes se pueden trasladar
+    d3.select("svg")
+        .append("g") //es parte de un grupo
+        .attr("id", "yMiEje")
+        .attr("transform", "translate(" + 50 + "," + 50 + ")")
+        .call(yMiEje);
+
+
+    //veamos que tiene la data
+    //luego que se carga, se envia los datos a la funcion lineChart
+    d3.csv("tweetdata.csv")
+        .then(function (data) {
+            lineChart(data)
+        });
+
+
+    function lineChart(data) {
+        //podemos ver la data, OJO!!!! no lo hagan si tienen muchos datos
+        console.log(data)
+
+        //calculemos algunas estadisticas básicas
+        const media = d3.mean(data, function (d) {
+            return +d.tweets;
+        });
+        console.log(media)
+
+        const mediana = d3.median(data, function (d) {
+            return +d.tweets;
+        });
+        console.log(mediana)
+
+        const desviacion = d3.deviation(data, function (d) {
+            return +d.tweets;
+        });
+        console.log(desviacion)
+
+        const min_max = d3.extent(data, function (d) {
+            return +d.tweets;
+        });
+        console.log(min_max)
+
+        //ahora vamos a mostrar los puntos
+        //ojo que para mover un circle se usa cx y cy
+        d3.select("svg")
+            .selectAll("circle .tweets")
+            .data(data).enter()
+            .append("circle")
+            .attr("class", "tweets")
+            .attr("r", 5)
+            .attr("cx", function (d) {
+                return miEscalaX(d.day)
+            })
+            .attr("cy", function (d) {
+                return miEscalaY(d.tweets)
+            })
+            .style("fill", "orange")
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
+
+        //sintaxis moderna
+        let tweetLine = d3.line()
+            .x(d => {
+                return miEscalaX(d.day) //depende de la data que leen
+            })
+            .y(d => miEscalaY(d.tweets)); //depende de la data que leen
+
+        tweetLine.curve(d3.curveBasis);
+        //curveCatmullRomClosed
+        //curveLinear
+        //curveBasisClosed
+        //curveBasisOpen
+        //curveBundle
+        //curveBasis
+        //curveStep
+        //curveCardinal
+        //https://github.com/d3/d3-shape
+
+        //como siempre, aqui es donde realmente se dibuja
+        d3.select("svg")
+            .append("path")
+            .attr("d", tweetLine(data))
+            .attr("fill", "none")
+            .attr("stroke", "pink")
+            .attr("stroke-width", "2px")
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
+
+        //ahora similar a linea, podemos usar area
+        let area = d3.area()
+            .x(function (d) {
+                return miEscalaX(d.day) //podria cambiar
+            })
+            .y0(function (d) {
+                return miEscalaY(d.tweets) //podria cambiar
+            })
+            .y1(function (d) {
+                return miEscalaY(0) //podria cambiar
+            })
+            .curve(d3.curveCatmullRomClosed); //revisar documentacion con todas las posibles formas
+
+        //aqui se dibuja
+        d3.select("svg")
+            .append("path")
+            .style("id", "Area")
+            .attr("d", area(data))
+            .attr("fill", "#75739F")
+            .attr("stroke", "#75739F")
+            .attr("stroke-width", 2)
+            .style("stroke-opacity", .75)
+            .style("fill-opacity", .5)
+            .attr("transform", function (d, i) {
+                return "translate(" + (i + 1) * 50 + "," + 50 + ")" //no tiene sentido esto
+            });
+
+        //usamos el plugin legend
+        let fillScale = d3.scaleOrdinal()
+            .domain(["tweets", "holi :)"])
+            .range(["#75739F", "red"])
+
+        let legendA = d3.legendColor().scale(fillScale)
+
+        //esto de aqui es lo que crea realmente las legendas
+        d3.select("svg")
+            .append("g")
+            .attr("id", "grupo_legendas")
+            .style("font-size", '20px') //tiene prioridad sobre el estilo que pueda tener una clase
+            .attr("transform", "translate(300, 100)")
+            .style("font-family", "Libre Caslon Text")
+            .call(legendA)
+    }
+
+</script>
+</body>
+</html>
