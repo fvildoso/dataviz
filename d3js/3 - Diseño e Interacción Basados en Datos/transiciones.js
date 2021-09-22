@@ -3,7 +3,7 @@ function azar(x, y) {
     return Math.floor(Math.random() * y) + x
 }
 
-//aqui se hacen cosas locas 👀
+//aquí se hacen cosas locas 👀
 function transiciones() {
 
     //definimos algunas constantes a utilizar
@@ -23,7 +23,7 @@ function transiciones() {
         .attr("cx", 100)
         .attr("cy", 100);
 
-    //hacemos un grupo dejar ahi lo que queremos mover dentro de si mismo
+    //hacemos un grupo para dejar ahi lo que queremos mover dentro de si mismo
     const container =
         d3.select("#viz_2")
             .select("svg")
@@ -41,10 +41,10 @@ function transiciones() {
         .attr("x", -lado / 2)
         .attr("y", -lado / 2);
 
-    //variable a utilizar espues
+    //variable a utilizar después
     let delta = 0;
 
-    //hacemos una transicion con el rect
+    //hacemos una transición con el rect
     d3.select("#rectHoli2")
         .transition()
         .duration(500) //tiempo en milisegundos que queremos que dure la transicion
@@ -64,7 +64,7 @@ function transiciones() {
                 .on("start", repeat); //volvemos a hacer esto mismo
         });
 
-    //aqui le damos moviemiento al container
+    //aqui le damos movimiento al container
     container
         .transition()
         .duration(2000)
