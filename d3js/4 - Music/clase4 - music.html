@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <title>D3.js - Music</title>
+    <meta charset="utf-8"/>
+
+    <!--	d3 😍-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/meyda@5.2.2/dist/web/meyda.min.js"></script>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .img_takemichi {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 170px;
+        }
+    </style>
+</head>
+<body>
+<!--<div id="panel">-->
+<!--    <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>-->
+<!--    <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>-->
+<!--</div>-->
+<img src="Takemichi.webp" alt="takemichi" class="img_takemichi">
+<script>
+    //https://www.bignerdranch.com/blog/music-visualization-with-d3-js/
+    //https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+    d3.select("body")
+        .append("audio")
+        .attr('controls', true)
+        .attr("id", "audioElement")
+        .attr("src", "Cry Baby.mp3")
+    // .attr("src","Attack_on_Titan_S2_ED_transcribed_Yuugure_no_Tori_夕暮れの鳥_Shinsei_Kamattechan_神聖かまってちゃん[Mp3Converter.net].mp3")
+    // .attr("src", "Brave_Heart_triVersion_-_Ayumi_Miyazaki_MV_Digimon_Adventure_Tri[Mp3Converter.net].mp3")
+
+    //guardamos el elemento donde está el audio
+    const audioElement = d3.select("#audioElement").node();
+
+    //creamos boton para darle play
+    // d3.select("#panel")
+    //     .append("button")
+    //     .attr("id", "play")
+    //     .text("Play")
+    //     .on("click", play);
+    //
+    // //creamos boton para darle play
+    // d3.select("#panel")
+    //     .append("button")
+    //     .attr("id", "pause")
+    //     .text("Pause")
+    //     .on("click", pause);
+    //
+    // function play() {
+    //     //necesitamos el DOM element, para eso usamos el node.
+    //     d3.select("#audioElement").node().play();
+    // }
+    //
+    // function pause() {
+    //     //necesitamos el DOM element, para eso usamos el node.
+    //     d3.select("#audioElement").node().pause();
+    // }
+
+    //https://developer.mozilla.org/es/docs/Web/API/AudioContext
+    //audio context nos sirve para procesar el audio
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    //indicamos la fuente, tiene que ser un elemento del DOM
+    const audioSrc = audioContext.createMediaElementSource(audioElement);
+
+    //sirve para tener el tiempo y la frecuencia
+    const analyser = audioContext.createAnalyser();
+
+    // Vincula nuestro analizador a la fuente.
+    audioSrc.connect(analyser);
+    audioSrc.connect(audioContext.destination);
+
+    //https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Uint8Array
+    //representan un array de enteros sin signo de 8 bit
+    const frequencyData = new Uint8Array(700);
+    // const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+    //creamos el svg
+    const svgHeight = window.screen.height - 200;
+    const svgWidth = window.screen.width; //obtenemos el ancho de la pantalla
+    const svg = d3.select("body")
+        .append('svg')
+        .attr('height', svgHeight)
+        .attr('width', svgWidth);
+
+    const frequencyScale = d3.scaleLinear()
+        .domain([0, 255])
+        .range([0, svgHeight]);
+
+    const colorScale = d3.scaleLinear().domain([0, 1]).range([0, 0.8])
+    // const color = d3.scaleQuantize()
+    //     .domain([0, 255])
+    //     .range(["#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f", "#bf5b17", "#666666"])
+    const colorScaleTwo = d3.scaleLinear().domain([0, 255]).range([0, 1])
+
+
+    const barPadding = 0; // OJO cuando usen el padding, ya que el ancho siempre tiene que ser positivo
+
+    //inicialmente la data son solo ceros para crear los elementos
+    svg.selectAll('rect')
+        .data(frequencyData)
+        .enter()
+        .append('rect')
+        .attr('x', function (d, i) {
+            return i * (svgWidth / frequencyData.length) + barPadding;
+        })
+        .attr('width', (svgWidth / frequencyData.length) - barPadding)
+
+
+    //creamos la funcion que actualiza las barras
+    function renderChart() {
+
+        //obtenemos la frecuencia y se la damos al array
+        analyser.getByteFrequencyData(frequencyData);
+
+        //actualizamos los valores de la barra
+        svg.selectAll('rect')
+            .data(frequencyData)
+            //.transition()
+            .attr('y', function (d) {
+                // return svgHeight - d;
+                return svgHeight / 2 - d / 2;
+            })
+            .attr('height', function (d) {
+                return frequencyScale(d / 2);
+            })
+            .style('fill', function (d) {
+                // return color(d);
+                return d3.interpolateCool(colorScaleTwo(d));
+            });
+    }
+
+    //hacemos que se ejecute está funcion de manera continua
+    d3.timer(renderChart)
+
+
+    // meyda
+    const source = audioContext.createMediaElementSource(audioElement);
+    // Connect the Audio Node to your speakers. Now that the audio lives in the
+    // Audio Context, you have to explicitly connect it to the speakers in order to
+    // hear it
+    // source.connect(audioContext.destination);
+
+
+    if (typeof Meyda === "undefined") {
+        console.log("Meyda could not be found! Have you included it?");
+    } else {
+        const analyzer = Meyda.createMeydaAnalyzer({
+            audioContext: audioContext,
+            source: source,
+            bufferSize: 512 * 2 * 2,
+            featureExtractors: ["rms"],
+            callback: (features) => {
+                d3.select('body')
+                    .transition()
+                    .duration(100)
+                    .style('background-color', d3.interpolateWarm(colorScale(features.rms)))
+                // console.log(features);
+            },
+        });
+        analyzer.start();
+    }
+
+
+</script>
+</body>
+</html>
