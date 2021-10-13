@@ -72,6 +72,8 @@
     //https://developer.mozilla.org/es/docs/Web/API/AudioContext
     //audio context nos sirve para procesar el audio
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext2 = new (window.AudioContext || window.webkitAudioContext)();
+
 
     //indicamos la fuente, tiene que ser un elemento del DOM
     const audioSrc = audioContext.createMediaElementSource(audioElement);
@@ -148,7 +150,7 @@
 
 
     // meyda
-    const source = audioContext.createMediaElementSource(audioElement);
+    // const source = audioContext2.createMediaElementSource(audioElement);
     // Connect the Audio Node to your speakers. Now that the audio lives in the
     // Audio Context, you have to explicitly connect it to the speakers in order to
     // hear it
@@ -160,7 +162,7 @@
     } else {
         const analyzer = Meyda.createMeydaAnalyzer({
             audioContext: audioContext,
-            source: source,
+            source: audioSrc,
             bufferSize: 512 * 2 * 2,
             featureExtractors: ["rms"],
             callback: (features) => {
