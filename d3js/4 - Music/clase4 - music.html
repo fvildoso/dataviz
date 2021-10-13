@@ -118,14 +118,10 @@
         .attr('x', function (d, i) {
             return i * (svgWidth / frequencyData.length) + barPadding;
         })
-        .attr('width', (svgWidth / frequencyData.length) - barPadding)
-        .attr('width', function (d) {
+        // .attr('width', (svgWidth / frequencyData.length) - barPadding)
+        .attr('width', function () {
             const ancho = (svgWidth / frequencyData.length) - barPadding
-            if (ancho < 0) {
-                return 10;
-            } else {
-                return ancho
-            }
+            return ancho < 0 ? 10 : ancho;
         })
 
 
