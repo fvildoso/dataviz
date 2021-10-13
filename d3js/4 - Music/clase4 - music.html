@@ -36,13 +36,14 @@
     //https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
     d3.select("body")
         .append("audio")
-        .attr('controls', true)
+        .attr('controls', true) // esto son los controles que da el navegador por defecto.
         .attr("id", "audioElement")
         .attr("src", "Cry Baby.mp3")
     // .attr("src","Attack_on_Titan_S2_ED_transcribed_Yuugure_no_Tori_夕暮れの鳥_Shinsei_Kamattechan_神聖かまってちゃん[Mp3Converter.net].mp3")
     // .attr("src", "Brave_Heart_triVersion_-_Ayumi_Miyazaki_MV_Digimon_Adventure_Tri[Mp3Converter.net].mp3")
 
     //guardamos el elemento donde está el audio
+    // const audioElement = document.querySelector("#audioElement");
     const audioElement = d3.select("#audioElement").node();
 
     //creamos boton para darle play
@@ -72,8 +73,6 @@
     //https://developer.mozilla.org/es/docs/Web/API/AudioContext
     //audio context nos sirve para procesar el audio
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const audioContext2 = new (window.AudioContext || window.webkitAudioContext)();
-
 
     //indicamos la fuente, tiene que ser un elemento del DOM
     const audioSrc = audioContext.createMediaElementSource(audioElement);
@@ -87,8 +86,8 @@
 
     //https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Uint8Array
     //representan un array de enteros sin signo de 8 bit
-    const frequencyData = new Uint8Array(700);
-    // const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    // const frequencyData = new Uint8Array(10);
+    const frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
     //creamos el svg
     const svgHeight = window.screen.height - 200;
@@ -109,7 +108,7 @@
     const colorScaleTwo = d3.scaleLinear().domain([0, 255]).range([0, 1])
 
 
-    const barPadding = 0; // OJO cuando usen el padding, ya que el ancho siempre tiene que ser positivo
+    const barPadding = 10; // OJO cuando usen el padding, ya que el ancho siempre tiene que ser positivo
 
     //inicialmente la data son solo ceros para crear los elementos
     svg.selectAll('rect')
@@ -120,6 +119,14 @@
             return i * (svgWidth / frequencyData.length) + barPadding;
         })
         .attr('width', (svgWidth / frequencyData.length) - barPadding)
+        .attr('width', function (d) {
+            const ancho = (svgWidth / frequencyData.length) - barPadding
+            if (ancho < 0) {
+                return 10;
+            } else {
+                return ancho
+            }
+        })
 
 
     //creamos la funcion que actualiza las barras
@@ -156,20 +163,20 @@
     // hear it
     // source.connect(audioContext.destination);
 
-
+    //https://meyda.js.org/audio-features
     if (typeof Meyda === "undefined") {
         console.log("Meyda could not be found! Have you included it?");
     } else {
         const analyzer = Meyda.createMeydaAnalyzer({
             audioContext: audioContext,
             source: audioSrc,
-            bufferSize: 512 * 2 * 2,
+            bufferSize: 512 * 2 * 4,
             featureExtractors: ["rms"],
             callback: (features) => {
                 d3.select('body')
                     .transition()
                     .duration(100)
-                    .style('background-color', d3.interpolateWarm(colorScale(features.rms)))
+                    .style('background-color', d3.interpolateCubehelixDefault(colorScale(features.rms)))
                 // console.log(features);
             },
         });
