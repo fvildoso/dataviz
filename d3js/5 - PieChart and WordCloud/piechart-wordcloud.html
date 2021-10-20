@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>D3.js - PieChart y WordCloud</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--	d3 😍-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- https://github.com/jasondavies/d3-cloud -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.js"></script>
+
+    <style>
+        svg {
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+<body>
+<div id="viz">
+    <svg id="piechart" width="600" height="600"></svg>
+    <svg id="cloud" width="600" height="600"></svg>
+</div>
+
+<script type="text/javascript">
+
+    // leemos la data
+    d3.csv("worddata.csv")
+        .then(function (d) {
+            dataViz_piechart(d);
+            dataViz_wordcloud(d);
+        })
+
+    //piechart
+    function dataViz_piechart(data) {
+
+        //obtenemos un array solo con las frecuencias
+        const frecuencias = [];
+        data.forEach(function (element) {
+            frecuencias.push(element.frequency);
+        });
+
+        //escala con colores
+        //https://github.com/d3/d3-scale-chromatic
+        console.log("Colores");
+        const colorScale = d3.scaleOrdinal(d3.schemePaired);
+        console.log(d3.schemePaired);
+        console.log(colorScale(1))
+        console.log(colorScale(100))
+
+        //piechart
+        console.log("PieChart");
+        //https://github.com/d3/d3-shape
+        let pieChart = d3.pie()(frecuencias);
+        console.log(pieChart);
+
+        //lo mismo de siempre
+        //notar que le damos el piechart
+        //el atributo d, dibuja necesita que le demos un arco
+        d3.select("#piechart")
+            .append("g")
+            .attr("transform", "translate(300,300)")
+            .selectAll("path")
+            .data(pieChart).enter()
+            .append("path")
+            .attr("id", function (d, i) {
+                return "torta" + i;
+            })
+            .attr("d",
+                d3.arc()
+                    .outerRadius(function () {
+                        return 100;
+                    })
+                    .innerRadius(50)
+            )
+            .style("fill", function (d, i) {
+                return colorScale(i)
+            })
+            .style("opacity", .5)
+            .style("stroke", "black")
+            .attr("transform", "rotate(60)")
+            .style("stroke-width", "2px");
+
+        // d3.select("#torta1").remove()
+    }
+
+    //wordcloud
+    //text,frequency
+    //https://github.com/jasondavies/d3-cloud
+    function dataViz_wordcloud(data) {
+        //creamos una escala para las fuentes y frecuencias
+        const wordScale = d3.scaleLinear().domain([0, 100]).range([0, 200]);
+
+        //servirá despues
+        const keywords = ["layout", "zoom", "circle", "style", "append", "attr"]
+
+        //le pasamos la data en words
+        //usamos la escala para "normalizar" los tamaños
+        //le asignamos un nuevo campo size
+        //dibujamos cuando termina de inicializar
+        //draw tendrá asignado data
+        d3.layout.cloud().size([1000, 1000])
+            .words(data)
+            // .rotate(function (d) {
+            //     return 0;
+            // })
+            .fontSize(function (d) {
+                return wordScale(d.frequency);
+            })
+            .padding(1)
+            .on("end", draw)
+            .start();
+
+        //funcion que dibuja
+        function draw(words) {
+            console.log("Words: ");
+            console.log(words);
+
+            //seleccionamos el svg cloud y agregamos un g
+            //notar que tenemos que trasladar el grupo
+            const wordG = d3.select("#cloud")
+                .append("g")
+                .attr("id", "wordCloudG")
+                .attr("transform", "translate(300,300)");
+
+            //agregamos cada palabra
+            //https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/text-anchor
+            //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
+            wordG.selectAll("text")
+                .data(words).enter()
+                .append("text")
+                .style("font-size", function (d) {
+                    //console.log(d);
+                    return d.size + "px";
+                    //return parseInt(d.frequency) + "px";
+                })
+                .style("fill", function (d) {
+                    console.log(keywords.indexOf(d.text));
+                    // return "black"
+                    return (keywords.indexOf(d.text) > -1 ? "red" : "black");
+                    /*
+                    if(keywords.indexOf(d.text)==1){
+                        return 'red';
+                    } else {
+                        return 'black';
+                    }
+                    */
+                })
+                .style("opacity", .75)
+                .attr("text-anchor", "middle")
+                .attr("transform", function (d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                // .attr("transform", function(d) {
+                // 	return d.text.length > 5 ? "translate(" + [d.x, d.y] + ")rotate(" + 0 + ")" : "translate(" + [d.x, d.y] + ")rotate(" + 90 + ")";;
+                // })
+                .text(function (d) {
+                    return d.text;
+                });
+        }
+
+    }
+</script>
+</body>
+</html>
