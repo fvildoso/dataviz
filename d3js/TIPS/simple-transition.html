@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>D3.js - Just Rotate</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--	d3 😍-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- https://github.com/jasondavies/d3-cloud -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.js"></script>
+
+    <style>
+        svg {
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    //creamos svg
+    const svg = d3.select('body')
+        .append('svg')
+        .attr('width',450)
+        .attr('height',400)
+
+    const rect = svg
+        .append('rect')
+        .attr('id','rectangulo')
+        .attr("width", 100)
+        .attr("height", 100)
+        .attr("rx", 20)
+        .attr("x", 0)
+        .attr("y", 200);
+
+    rect
+        .transition()
+        .duration(4000)
+        .attr("x", 400)
+        .attr("y", 200)
+        .style("fill", () => d3.interpolateTurbo(Math.random()))
+</script>
+</body>
+</html>

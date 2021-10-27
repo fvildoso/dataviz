@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>D3.js - Just Rotate</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--	d3 😍-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- https://github.com/jasondavies/d3-cloud -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.js"></script>
+
+    <style>
+        svg {
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+<body>
+<div id="viz">
+    <svg id="piechart" width="600" height="600"></svg>
+</div>
+
+<script type="text/javascript">
+
+    const data = [20, 80]
+
+    //piechart
+    function dataViz_piechart(data) {
+
+        //obtenemos un array solo con las frecuencias
+        const frecuencias = data
+
+        //piechart
+        console.log("PieChart");
+        //https://github.com/d3/d3-shape
+        let pieChart = d3.pie()(frecuencias);
+        console.log(pieChart);
+
+        //lo mismo de siempre
+        //notar que le damos el piechart
+        //el atributo d, dibuja necesita que le demos un arco
+        d3.select("#piechart")
+            .append("g")
+            .attr("id", 'dona')
+            .attr("transform", "translate(300,300)")
+            .selectAll("path")
+            .data(pieChart).enter()
+            .append("path")
+            .attr("id", function (d, i) {
+                return "torta" + i;
+            })
+            .attr("class", "trozo")
+            .attr("d",
+                d3.arc()
+                    .outerRadius(function () {
+                        return 100;
+                    })
+                    .innerRadius(50)
+            )
+            .style("fill", function (d, i) {
+                return d3.interpolateTurbo(Math.random())
+            })
+            // .style("opacity", .5)
+            .style("stroke", "black")
+            // .attr("transform", "rotate(180)")
+            .style("stroke-width", "2px");
+
+        //nos comemos un poco de la dona
+        d3.select("#torta0").remove()
+
+        //rotamos
+        let theta = 0;
+        d3.selectAll('.trozo')
+            .transition()
+            .duration(0)
+            .on("start", function repeat() {
+                theta = theta + 90
+                d3.active(this)
+                    .attr("transform", function () {
+                        return "rotate(" + theta + ")";
+                    })
+                    .style("fill", function (d, i) {
+                        return d3.interpolateTurbo(Math.random())
+                    })
+                    .transition()
+                    .duration(4000)
+                    .ease(d3.easeLinear) //agregamos esto si queremos que la transicion ocurra de forma lineal
+                    .on("start", repeat);
+            })
+
+
+    }
+
+    dataViz_piechart(data)
+</script>
+</body>
+</html>
