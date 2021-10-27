@@ -93,10 +93,10 @@ router.get('/actors/:nombre/:limit',
         nombre = "%" + nombre + "%"
 
         let limit = req.params.limit;
-        if (limit === undefined) {
-            limit = 10;
-        }
         limit = parseInt(limit.replace(/\D/g, ""));
+        if (limit.length === 0){
+            limit = 1
+        }
 
         con.query({
             sql: 'SELECT * FROM `actor` WHERE `first_name` like ? OR last_name like ? LIMIT ' + limit,
@@ -122,6 +122,7 @@ let con;
 function handleDisconnect() {
     con = mysql.createConnection({
         host: 'localhost',
+        port: 3307,
         user: 'root',
         password: 'local',
         database: 'sakila',
