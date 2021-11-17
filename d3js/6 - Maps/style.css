@@ -1,0 +1,55 @@
+svg {
+    border: 1px solid gray;
+    width: 100%;
+    height: 500px;
+}
+
+path.countries {
+    stroke-width: 1;
+    stroke: #75739F;
+    fill: #5EAFC6;
+}
+
+circle.cities {
+    stroke-width: 1;
+    stroke: #4F442B;
+    fill: #FCBC34;
+}
+
+circle.centroid {
+    fill: #75739F;
+    pointer-events: none;
+}
+
+path.graticule {
+    fill: none;
+    stroke-width: 1;
+    stroke: lightgray;
+}
+
+path.graticule.outline {
+    stroke: #9A8B7A;
+}
+
+path.merged {
+    fill: #9A8B7A;
+    stroke: #4F442B;
+    stroke-width: 2px;
+}
+
+.modal {
+    border: 1px solid gray;
+    stroke-width: 2px;
+    height: 100px;
+    width: 300px;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
+    top: -500px;
+    left: 0;
+    height: 100%;
+    background-color: rgb(110, 1, 107);
+    color: white;
+    box-shadow: 12px 12px 2px 1px rgba(0, 0, 255, .2);
+    display: none;
+}

@@ -81,10 +81,10 @@
             })
             .style("opacity", .5)
             .style("stroke", "black")
-            .attr("transform", "rotate(60)")
+            .attr("transform", "rotate(180)")
             .style("stroke-width", "2px");
 
-        // d3.select("#torta1").remove()
+        d3.select("#torta1").remove()
     }
 
     //wordcloud
@@ -102,11 +102,11 @@
         //le asignamos un nuevo campo size
         //dibujamos cuando termina de inicializar
         //draw tendrá asignado data
-        d3.layout.cloud().size([1000, 1000])
+        d3.layout.cloud().size([600, 600])
             .words(data)
-            // .rotate(function (d) {
-            //     return 0;
-            // })
+            .rotate(function (d) {
+                return 0;
+            })
             .fontSize(function (d) {
                 return wordScale(d.frequency);
             })
@@ -129,7 +129,7 @@
             //agregamos cada palabra
             //https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/text-anchor
             //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
-            wordG.selectAll("text")
+            wordG.selectAll("text.miclase")
                 .data(words).enter()
                 .append("text")
                 .style("font-size", function (d) {
@@ -139,8 +139,8 @@
                 })
                 .style("fill", function (d) {
                     console.log(keywords.indexOf(d.text));
-                    // return "black"
-                    return (keywords.indexOf(d.text) > -1 ? "red" : "black");
+                    return "black"
+                    // return (keywords.indexOf(d.text) > -1 ? "red" : "black");
                     /*
                     if(keywords.indexOf(d.text)==1){
                         return 'red';

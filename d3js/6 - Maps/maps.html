@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>D3.js - Mapas</title>
+    <meta charset="utf-8"/>
+
+    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!--	d3 😍-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!--    colores-->
+    <script src="../assets/colorbrewer.js"></script>
+
+    <!--nuestro estilo -->
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+<div id="viz1">
+    <svg id="geoOrthographic1"></svg>
+</div>
+<div id="viz2">
+    <svg id="geoOrthographic2"></svg>
+</div>
+
+<script>
+
+    //Nos sirve para poder cargar los archivos y luego ejecutar createMap
+    Promise
+        .all([
+            d3.json("world.geojson"),
+            d3.csv('cities.csv'),
+            d3.json('curico.geojson')
+        ])
+        .then(resolve => {
+
+            createMap1(resolve[2]);
+
+            createMap2(resolve[0], resolve[1]);
+        });
+
+    //creamos el mapa1
+    function createMap1(countries) {
+
+        const viz1 = d3.select("#viz1");
+        const ancho = viz1.style("width").substring(0, viz1.style("width").length - 2) - 10;
+        console.log("Ancho: " + ancho);
+
+        //como proyectamos lo que vamos a dibujar
+        //https://github.com/d3/d3-geo/blob/master/README.md#d3-geo
+        //https://github.com/d3/d3-geo-projection#geoConicEqualArea
+        const projection = d3.geoMercator()
+            //que tan cercano
+            .scale(20000)
+            // .translate([ancho / 2, 250])
+            //desde el centro, lo podemos mover
+            .center([-72, -35.2]);
+
+        //definimos nuestro geoPath, lo que queremos dibujar
+        const geoPath = d3.geoPath().projection(projection);
+
+        //solo datos
+        const poblacion = [
+            {comuna: "Curicó", cantidad: 125275},
+            {comuna: "Hualañé", cantidad: 9657},
+            {comuna: "Licantén", cantidad: 6653},
+            {comuna: "Molina", cantidad: 45976},
+            {comuna: "Rauco", cantidad: 10484},
+            {comuna: "Romeral", cantidad: 15187},
+            {comuna: "Sagrada Familia", cantidad: 18544},
+            {comuna: "Teno", cantidad: 28921},
+            {comuna: "Vichuquén", cantidad: 4322},
+        ];
+
+        //geoArea nos da el area dado un GeoJson
+        //extent nos devuelve el minimo y maximo valor
+        const realFeatureSize = d3.extent(poblacion, function (d) {
+            return +d.cantidad
+        });
+        console.log("Mínimo y Máximo: ");
+        console.log(realFeatureSize);
+
+        //hacemos un escala para los colores
+        //veamos cual es el rango
+        //https://github.com/d3/d3-scale#scaleQuantize
+        const newFeatureColor = d3.scaleQuantize()
+            .domain(realFeatureSize)
+            .range(colorbrewer.BuPu[7]);
+
+        //Nada nuevo, aqui hacemos el dibujo
+        d3.select("#geoOrthographic1").selectAll("path")
+            .data(countries.features).enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", d => d.id)
+            .attr("class", "countries")
+            .style("fill", d => {
+
+                //comentar la linea de abajo para ver que hace el resto
+                return "grey"
+
+                console.log(d.properties.NOM_COM);
+
+                let poblacionEncontrada;
+                poblacion.forEach(function (e) {
+                    console.log(d.properties.NOM_COM);
+                    console.log(e.comuna);
+
+
+                    if (e.comuna === d.properties.NOM_COM) {
+                        poblacionEncontrada = e.cantidad;
+                    }
+                });
+
+                return newFeatureColor(poblacionEncontrada)
+            })
+            .style("stroke", d => d3.rgb(newFeatureColor(d3.geoArea(d))).darker());
+
+        // //generamos la "grilla"
+        // const graticule = d3.geoGraticule();
+        //
+        // //dibujamos la grilla
+        // d3.select("#geoOrthographic1").insert("path", "path.countries")
+        //     .datum(graticule)
+        //     .attr("class", "graticule line")
+        //     .attr("d", geoPath);
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on('zoom', function (event) {
+                d3.select("#geoOrthographic1").selectAll('path')
+                    .attr('transform', event.transform);
+            });
+
+        d3.select("#geoOrthographic1").call(zoom);
+    }
+
+    //creamos el mapa1
+    function createMap2(countries, cities) {
+
+        const viz1 = d3.select("#viz2");
+        const ancho = viz1.style("width").substring(0, viz1.style("width").length - 2) - 10;
+        console.log("Ancho: " + ancho);
+
+        //como proyectamos lo que vamos a dibujar
+        //https://github.com/d3/d3-geo/blob/master/README.md#d3-geo
+        //https://github.com/d3/d3-geo-projection#geoConicEqualArea
+        const projection_2 = d3.geoMercator()
+            //que tan cercano
+            .scale(200)
+            // .translate([ancho / 2, 250])
+            //desde el centro, lo podemos mover
+            .center([-72, -35.2]);
+
+        //definimos nuestro geoPath, lo que queremos dibujar
+        const geoPath = d3.geoPath().projection(projection_2);
+
+        //features es un array con cada pais
+        const featureData = countries.features;
+
+        //geoArea nos da el area dado un GeoJson
+        //extent nos devuelve el minimo y maximo valor
+        const realFeatureSize = d3.extent(featureData, d => d3.geoArea(d));
+        console.log("Mínimo y Máximo: ");
+        console.log(realFeatureSize);
+
+        //hacemos un escala para los colores
+        //veamos cual es el rango
+        //https://github.com/d3/d3-scale#scaleQuantize
+        const newFeatureColor = d3.scaleQuantize()
+            .domain(realFeatureSize)
+            .range(colorbrewer.BuPu[7]);
+
+        //Nada nuevo, aqui hacemos el dibujo
+        d3.select("#geoOrthographic2").selectAll("path")
+            .data(countries.features).enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", d => d.id)
+            .attr("class", "countries")
+            .style("fill", d => {
+                return newFeatureColor(d3.geoArea(d))
+            })
+            .style("stroke", d => d3.rgb(newFeatureColor(d3.geoArea(d))).darker());
+
+
+        //dibujamos las ciudades
+        d3.select("#geoOrthographic2").selectAll("circle")
+            .data(cities).enter()
+            .append("circle")
+            .attr("class", "cities")
+            .attr("r", 10)
+            .attr("cx", d => projection_2([d.x, d.y])[0])
+            .attr("cy", d => projection_2([d.x, d.y])[1]);
+
+        d3.select("#geoOrthographic2").selectAll("text")
+            .data(cities).enter()
+            .append("text")
+            .attr("x", d => projection_2([d.x, d.y])[0])
+            .attr("y", d => projection_2([d.x, d.y])[1])
+            .style("font-size", "20px")
+            .style("font-family", "sans-serif")
+            .style("fill", "black")
+            .text(d => {
+                return d.label
+            });
+
+
+        d3.select("#geoOrthographic2").selectAll("images")
+            .data(cities).enter()
+            .append("svg:image")
+            .attr("xlink:href", "http://pngimg.com/uploads/pokemon/pokemon_PNG154.png")
+            .attr("x", d => projection_2([d.x, d.y])[0])
+            .attr("y", d => projection_2([d.x, d.y])[1])
+            .attr('width', 100)
+            .attr('height', 100)
+
+        //generamos la "grilla"
+        const graticule = d3.geoGraticule();
+
+        //dibujamos la grilla
+        d3.select("#geoOrthographic2").insert("path", "path.countries")
+            .datum(graticule)
+            .attr("class", "graticule line")
+            .attr("d", geoPath);
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on('zoom', function (event) {
+                d3.select("#geoOrthographic2").selectAll('path')
+                    .attr('transform', event.transform);
+
+                d3.select("#geoOrthographic2").selectAll('text')
+                    .attr('transform', event.transform);
+
+                d3.select("#geoOrthographic2").selectAll('circle')
+                    .attr('transform', event.transform);
+
+                d3.select("#geoOrthographic2").selectAll('image')
+                    .attr('transform', event.transform);
+            });
+
+        d3.select("#geoOrthographic2").call(zoom);
+    }
+
+</script>
+</body>
+
+</html>
