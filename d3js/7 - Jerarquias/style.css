@@ -1,0 +1,16 @@
+.tick line {
+    opacity: 0.1;
+}
+
+text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+g.node {
+    background-color: red;
+}
+svg {
+    width: 800px;
+    height: 800px;
+}
