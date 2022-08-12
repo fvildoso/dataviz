@@ -113,7 +113,7 @@
         //un rectangulo no puede tener labels.
         d3.select("svg")
             .selectAll("rect")
-            .data(array_azar)
+            .data(data)
             .enter().append("rect")
             .attr("width", 50)
             .attr("height", function (d) {
