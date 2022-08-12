@@ -64,19 +64,12 @@
         sel.remove()
     }, 2000);
 
-    //usamos d3.json para leer un json que esté en alguna direccion
-    d3.json("https://jsonplaceholder.typicode.com/todos/1")
-        .then(function (response) {
-            //response podría haber sido cualquier otra cosa, como en el forEach
-            console.log(response);
-            console.log(response.title)
-        })
-
-
     //podemos crear una funcion para pasarla en d3.csv o d3.json
     function do_nothing() {
         console.log("well.. I actually do something 🤣");
     }
+
+    do_nothing()
 
     //funcion para tener un numero random entre dos numeros
     function random(x, y) {
@@ -85,69 +78,64 @@
 
     //funcion para generar un vector con numeros random
     function random_array(x, y, z) {
-        var a = [];
+        const a = [];
         for (i = 0; i < z; i++) {
             a.push(random(x, y))
         }
         return a;
     }
 
-    //leemos el csv de avocado y pasamos la data a la funcion do nothing, aunque no hace nada con la data
-    // d3.csv("avocado.csv")
-    //     .then(function (response) {
-    //         console.log("estoy adentro del comando que lee csv")
-    //         do_nothing();
-    //     });
+    let array_azar = random_array(10, 100, 10)
 
     // hacemos una funcion que si hará algo
     function do_something(data) {
 
-        let array_azar = random_array(10, 100, 10)
-        console.log("vamos a generar un array random")
-        console.log(array_azar)
-
         // esto es lo mas complejo de entender en d3
-        // d3.select("svg")
-        //     .selectAll("rect.random")
-        //     .data(array_azar)
-        //     .enter()
-        //     .append("rect")
-        //     .attr("class", "random")
-        //     .attr("width", 50)
-        //     .attr("height", function (d) {
-        //         return d;
-        //     })
-        //     .attr("x", function (d, i) {
-        //         return i * 60;
-        //     })
-        //     .attr("y", function (d) {
-        //         return 500 - d;
-        //     })
-        //     .attr("rx", "15")
-        //     .attr("ry", "15")
+        d3.select("svg")
+            .selectAll("rect.random")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class", "random")
+            .attr("width", 50)
+            .attr("height", function (d) {
+                return d;
+            })
+            .attr("x", function (d, i) {
+                return i * 60;
+            })
+            .attr("y", function (d) {
+                return 500 - d;
+            })
+            .attr("rx", "15")
+            .attr("ry", "15")
 
         //un rectangulo no puede tener labels.
-        // d3.select("svg")
-        //     .selectAll("rect")
-        //     .data(array_azar)
-        //     .enter().append("rect")
-        //     .attr("width", 50)
-        //     .attr("height", function (d) {
-        //         // console.log(d)
-        //         return d;
-        //     })
-        //     .style("fill", "#561255")
-        //     .style("stroke", "pink")
-        //     .style("stroke-width", "1px")
-        //     .style("opacity", .55)
-        //     .attr("x", function (d, i) {
-        //         return i * 40
-        //     });
+        d3.select("svg")
+            .selectAll("rect")
+            .data(array_azar)
+            .enter().append("rect")
+            .attr("width", 50)
+            .attr("height", function (d) {
+                // console.log(d)
+                return d;
+            })
+            .style("fill", "#561255")
+            .style("stroke", "pink")
+            .style("stroke-width", "1px")
+            .style("opacity", .55)
+            .attr("x", function (d, i) {
+                return i * 40
+            });
+
+    }
+
+    function do_something_with_g(data) {
 
         //necesitamos "g" para tener labels
         let svgG = d3.select("svg")
             .selectAll("g")
-            .data(array_azar)
+            .data(data)
             .enter()
             .append("g")
             .attr("transform", function (d, i) {
@@ -176,7 +164,30 @@
             });
     }
 
-    do_something();
+    //llamamos a la funcion
+    //do_something(array_azar);
+    //do_something_with_g(array_azar);
+
+    //usamos d3.json para leer un json que esté en alguna direccion
+    d3.json("https://jsonplaceholder.typicode.com/todos/1")
+        .then(function (response) {
+            //response podría haber sido cualquier otra cosa, como en el forEach
+            console.log(response);
+            console.log(response.title)
+        })
+
+    //leemos el csv de avocado y pasamos la data a la funcion do nothing, aunque no hace nada con la data
+    d3.csv("avocado.csv")
+        .then(function (response) {
+            console.log("estoy adentro del comando que lee csv")
+
+            //buscamos el maximo del lugar
+            const max = d3.max(response, function (item) {
+                return +item.AveragePrice
+            });
+
+            console.log("Max=" + max)
+        });
 
 </script>
 </body>
