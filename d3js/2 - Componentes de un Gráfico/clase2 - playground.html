@@ -49,7 +49,10 @@
     let xMiEje = d3.axisBottom()
         .scale(miEscalaX)
         .tickSize(250) //largo de los tick
-        .tickValues([1, 2, 3, 5, 7, 9, 10]); //solo números
+        .tickValues([1, 3, 7, 10])  //solo números
+        .tickFormat(function (d) {
+            return "#" + d
+        })
 
     // let xMiEje = d3.axisTop()
     //     .scale(miEscalaX)
