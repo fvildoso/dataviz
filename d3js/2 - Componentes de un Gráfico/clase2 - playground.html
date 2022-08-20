@@ -90,6 +90,7 @@
     //luego que se carga, se envía los datos a la función lineChart
     d3.csv("tweetdata.csv")
         .then(function (incommingData) {
+            console.log(incommingData)
 
             //basicSummaryStatistics(incommingData)
 
@@ -193,16 +194,14 @@
         //aqui se dibuja
         d3.select("svg")
             .append("path")
-            .style("id", "Area")
+            .attr("id", "Area")
             .attr("d", area(data))
             .attr("fill", "#75739F")
             .attr("stroke", "#75739F")
             .attr("stroke-width", 2)
             .style("stroke-opacity", .75)
             .style("fill-opacity", .5)
-            .attr("transform", function (d, i) {
-                return "translate(" + (i + 1) * 50 + "," + 50 + ")" //no tiene sentido esto
-            });
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
     }
 
     /*
@@ -212,8 +211,8 @@
 
         //usamos el plugin legend
         let fillScale = d3.scaleOrdinal()
-            .domain(["tweets", "holi :)"])
-            .range(["#75739F", "red"])
+            .domain(["tweets", "holi :)","otrocolor"])
+            .range(["#75739F", "red",blue])
 
         let legendA = d3.legendColor().scale(fillScale)
 
@@ -222,7 +221,7 @@
             .append("g")
             .attr("id", "grupo_legendas")
             .style("font-size", '20px') //tiene prioridad sobre el estilo que pueda tener una clase
-            .attr("transform", "translate(300, 100)")
+            .attr("transform", "translate(800, 100)")
             .style("font-family", "Libre Caslon Text")
             .call(legendA)
     }
