@@ -4,7 +4,7 @@
     <title>D3.js - Componentes de un Gráfico</title>
     <meta charset="utf-8"/>
 
-    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <!-- esto es lo que se ve junto al título en el tab-->
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
 
     <!--    cargamos la libreria de d3 que vamos a usar-->
@@ -45,7 +45,7 @@
     //axisBottom, los tick son hacia abajo
     //axisLeft
 
-    // mi primer eje, no lo dibuja, es solo la configuración
+    // mi primer eje no lo dibuja, es solo la configuración
     let xMiEje = d3.axisBottom()
         .scale(miEscalaX)
         .tickSize(250) //largo de los tick
@@ -59,7 +59,7 @@
     //podemos ver que es lo que tiene nuestra variable
     console.log(xMiEje); //algo feo D: !
 
-    //finalmente aqui dibujamos el eje x
+    //finalmente, aquí dibujamos el eje x
     //los ejes se pueden trasladar
     d3.select("svg")
         .append("g") //es parte de un grupo
@@ -74,7 +74,7 @@
         .scale(miEscalaY)
         .tickSize(200);
 
-    //finalmente aqui dibujamos el eje x
+    //finalmente, aquí dibujamos el eje x
     //los ejes se pueden trasladar
     d3.select("svg")
         .append("g") //es parte de un grupo
@@ -84,16 +84,22 @@
 
 
     //veamos que tiene la data
-    //luego que se carga, se envia los datos a la funcion lineChart
+    //luego que se carga, se envía los datos a la función lineChart
     d3.csv("tweetdata.csv")
-        .then(function (data) {
-            lineChart(data)
+        .then(function (incommingData) {
+
+            //basicSummaryStatistics(incommingData)
+
+            //lineChart(incommingData)
+
+            //drawLegends()
         });
 
 
-    function lineChart(data) {
-        //podemos ver la data, OJO!!!! no lo hagan si tienen muchos datos
-        console.log(data)
+    /*
+    * Función que muestra en consola algunas estadísticas básicas
+    */
+    function basicSummaryStatistics(data) {
 
         //calculemos algunas estadisticas básicas
         const media = d3.mean(data, function (d) {
@@ -115,6 +121,14 @@
             return +d.tweets;
         });
         console.log(min_max)
+    }
+
+    /*
+    * Función que dibuja un gráfico de línea
+    */
+    function lineChart(data) {
+        //podemos ver la data, OJO!!!! no lo hagan si tienen muchos datos
+        console.log(data)
 
         //ahora vamos a mostrar los puntos
         //ojo que para mover un circle se usa cx y cy
@@ -151,7 +165,7 @@
         //curveCardinal
         //https://github.com/d3/d3-shape
 
-        //como siempre, aqui es donde realmente se dibuja
+        //como siempre, aquí es donde realmente se dibuja
         d3.select("svg")
             .append("path")
             .attr("d", tweetLine(data))
@@ -163,15 +177,15 @@
         //ahora similar a linea, podemos usar area
         let area = d3.area()
             .x(function (d) {
-                return miEscalaX(d.day) //podria cambiar
+                return miEscalaX(d.day) //podría cambiar
             })
             .y0(function (d) {
-                return miEscalaY(d.tweets) //podria cambiar
+                return miEscalaY(d.tweets) //podría cambiar
             })
-            .y1(function (d) {
-                return miEscalaY(0) //podria cambiar
+            .y1(function () {
+                return miEscalaY(0) //podría cambiar
             })
-            .curve(d3.curveCatmullRomClosed); //revisar documentacion con todas las posibles formas
+            .curve(d3.curveCatmullRomClosed); //revisar documentación con todas las posibles formas
 
         //aqui se dibuja
         d3.select("svg")
@@ -186,6 +200,12 @@
             .attr("transform", function (d, i) {
                 return "translate(" + (i + 1) * 50 + "," + 50 + ")" //no tiene sentido esto
             });
+    }
+
+    /*
+    Dibujamos las legendas
+     */
+    function drawLegends() {
 
         //usamos el plugin legend
         let fillScale = d3.scaleOrdinal()
@@ -194,7 +214,7 @@
 
         let legendA = d3.legendColor().scale(fillScale)
 
-        //esto de aqui es lo que crea realmente las legendas
+        //esto de aquí es lo que crea realmente las legendas
         d3.select("svg")
             .append("g")
             .attr("id", "grupo_legendas")
