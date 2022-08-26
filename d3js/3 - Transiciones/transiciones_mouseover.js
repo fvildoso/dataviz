@@ -55,20 +55,11 @@ function transiciones() {
             .transition()
             .duration(500) //tiempo en milisegundos que queremos que dure la transicion
             .ease(d3.easeLinear) //agregamos esto si queremos que la transicion ocurra de forma lineal
-            .on("start", function repeat() {
-                delta = delta + 20; //actualizamos la variable
-
-                d3.active(this) //hacemos algo sobre lo que estamos moviendo
-                    .attr("transform", function () {
-                        //hacemos una rotacion y scalamiento
-                        return "rotate(" + 0 + delta + ") scale(" + azar(5, 20) / 10 + ")";
-                    })
-                    .attr("fill", colores[azar(0, 3)]) //usamos algun color al azar
-                    .attr("rx", azar(0, 100)) // cambiamos el radio de los vertices del rect
-                    .transition()
-                    .duration(azar(5, 15) * 100) //hacemos que la proxima transicion sea al azar
-                    .on("start", repeat); //volvemos a hacer esto mismo
-            });
+            .attr("transform", function () {
+                //hacemos una rotacion y scalamiento
+                return "rotate(" + 15 * azar(1, 30) + ") scale(" + azar(5, 20) / 10 + ")";
+            })
+            .attr("fill", d3.interpolateViridis(Math.random())) //usamos algun color al azar
     }
 
     // aqui le damos movimiento al container
