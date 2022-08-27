@@ -40,9 +40,6 @@ function transiciones() {
         .attr("x", -lado / 2)
         .attr("y", -lado / 2);
 
-    //variable a utilizar después
-    let delta = 0;
-
     //hacemos que parta cuando ponemos el mouse sobre el elemento
     d3.select("#rectHoli2")
         .on("mouseover", mouseOverCircle)
