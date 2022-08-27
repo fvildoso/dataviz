@@ -12,7 +12,6 @@ function transiciones() {
     const w = 100;
     const h = 100;
     const separacion = 50;
-    const colores = ["purple", "red", "black", "green"];
 
     //añadimos el circulo
     d3.select("#viz_2").select("svg")
