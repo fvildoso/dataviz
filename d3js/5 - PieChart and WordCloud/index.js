@@ -116,16 +116,16 @@ function dataViz_wordcloud(data) {
                 //return parseInt(d.frequency) + "px";
             })
             .style("fill", function (d) {
-                console.log(keywords.indexOf(d.text));
+
                 return "black"
                 // return (keywords.indexOf(d.text) > -1 ? "red" : "black");
-                /*
-                if(keywords.indexOf(d.text)==1){
-                    return 'red';
-                } else {
-                    return 'black';
-                }
-                */
+
+                // if (keywords.indexOf(d.text) > -1) {
+                //     return 'red';
+                // } else {
+                //     return 'black';
+                // }
+
             })
             .style("opacity", .75)
             .attr("text-anchor", "middle")
