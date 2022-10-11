@@ -121,14 +121,6 @@
             .attr("y2", d => d.y)
             .style("stroke", "black");
 
-        d3.select("#vizVer").select("#treeG").selectAll("line")
-            .data(treeData.filter(d => d.parent))
-            .enter().insert("line", "g")
-            .attr("x1", d => d.parent.y)
-            .attr("y1", d => d.parent.x)
-            .attr("x2", d => d.y)
-            .attr("y2", d => d.x)
-            .style("stroke", "black");
     }
 
     function vizHor(root) {
