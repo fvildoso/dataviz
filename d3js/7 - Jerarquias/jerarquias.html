@@ -30,6 +30,12 @@
     d3.json("tweets.json")
         .then(function (data) {
 
+            //como llega
+            console.log(data)
+
+            //como map
+            console.log(d3.group(data.tweets, d => d.user), ([key, value]) => ({key, value}))
+
             //necesitamos tener data ordenada de manera jerarquica
             //https://github.com/d3/d3-hierarchy/blob/master/README.md#hierarchy
 
@@ -41,7 +47,7 @@
             console.log("nestedTweets:");
             console.log(JSON.stringify(nestedTweets));
 
-            //necesitamos que haya un padre
+            //necesitamos que haya un nodo inicial
             const packableTweets = {id: "All Tweets", value: nestedTweets};
             console.log("packableTweets:");
             console.log(packableTweets);
