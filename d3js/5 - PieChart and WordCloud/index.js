@@ -82,9 +82,9 @@ function dataViz_wordcloud(data) {
     //draw tendrá asignada los datos
     d3.layout.cloud().size([600, 600])
         .words(data)
-        .rotate(function (d) {
-            return 0;
-        })
+        // .rotate(function (d) {
+        //     return 0;
+        // })
         .fontSize(function (d) {
             return wordScale(d.frequency);
         })
@@ -117,8 +117,8 @@ function dataViz_wordcloud(data) {
             })
             .style("fill", function (d) {
 
-                return "black"
-                // return (keywords.indexOf(d.text) > -1 ? "red" : "black");
+                // return "black"
+                return (keywords.indexOf(d.text) > -1 ? "red" : "black");
 
                 // if (keywords.indexOf(d.text) > -1) {
                 //     return 'red';

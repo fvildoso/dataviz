@@ -12,80 +12,83 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
 </head>
 <body>
-<div id="viz">
+<div id="vizVer">
+    <svg></svg>
+</div>
+<div id="vizHor">
+    <svg></svg>
+</div>
+<div id="vizAlt">
     <svg></svg>
 </div>
 <script>
 
+    const coloresScale = d3.scaleOrdinal()
+        .range(["#5EAFC6", "#FE9922", "#93c464", "#75739F"]);
+
     //leemos un json
     d3.json("tweets.json")
         .then(function (data) {
-            viz(data)
+
+            //necesitamos tener data ordenada de manera jerarquica
+            //https://github.com/d3/d3-hierarchy/blob/master/README.md#hierarchy
+
+            //https://github.com/d3/d3-array/blob/master/README.md#group
+            //agruparemos por usuario, notar que por defecto nos genera un Map, pero nosotros queremos un array de objetos
+            const nestedTweets =
+                Array.from(d3.group(data.tweets, d => d.user), ([key, value]) => ({key, value}))
+
+            console.log("nestedTweets:");
+            console.log(JSON.stringify(nestedTweets));
+
+            //necesitamos que haya un padre
+            const packableTweets = {id: "All Tweets", value: nestedTweets};
+            console.log("packableTweets:");
+            console.log(packableTweets);
+
+            //teniendo la data de manera jerarquica, hacemos que nos genere los relaciones
+            //https://github.com/d3/d3-hierarchy#hierarchy
+            const root = d3.hierarchy(packableTweets, d => d.value);
+
+            console.log("root:");
+            console.log(root);
+
+            vizVer(root)
+            vizHor(root)
+            vizAlt(root)
         })
 
-    //def viz
-    function viz(data) {
-
-        const coloresScale = d3.scaleOrdinal()
-            .range(["#5EAFC6", "#FE9922", "#93c464", "#75739F"]);
-
-        //necesitamos tener data ordenada de manera jerarquica
-        //https://github.com/d3/d3-hierarchy/blob/master/README.md#hierarchy
-
-        //https://github.com/d3/d3-array/blob/master/README.md#group
-        //agruparemos por usuario, notar que por defecto nos genera un Map, pero nosotros queremos un array de objetos
-        const nestedTweets =
-            Array.from(d3.group(data.tweets, d => d.user), ([key, value]) => ({key, value}))
-
-        console.log("nestedTweets:");
-        console.log(JSON.stringify(nestedTweets));
-
-        //necesitamos que haya un padre
-        var packableTweets = {id: "All Tweets", value: nestedTweets};
-        console.log("packableTweets:");
-        console.log(packableTweets);
-
-        //teniendo la data de manera jerarquica, hacemos que nos genere los relaciones
-        //https://github.com/d3/d3-hierarchy#hierarchy
-            var root = d3.hierarchy(packableTweets, d => d.value);
-
-        console.log("root:");
-        console.log(root);
+    function vizVer(root) {
 
         //https://github.com/d3/d3-hierarchy/blob/master/README.md#tree
         //vamos a hacer un arbol
-        var treeChart = d3.tree();
+        const treeChart = d3.tree();
 
         //tamaño desde el centro
-        treeChart.size([200, 200]);
-        // treeChart.size([500, 500]);
+        treeChart.size([500, 500]);
 
         //generamos la data necesaria
-        var treeData = treeChart(root).descendants();
+        const treeData = treeChart(root).descendants();
         console.log("treeData:");
         console.log(treeData);
         console.log(treeData.filter(d => d.parent));
 
         //creamos grupos, dentro de cada grupo pondremos los elementos
-        d3.select("svg")
+        d3.select("#vizVer")
+            .select("svg")
             .append("g")
             .attr("id", "treeG")
-            .attr("transform", "translate(300,300)")
-            // .attr("transform", "translate(60,20)")
+            .attr("transform", "translate(60,20)")
             .selectAll("g")
             .data(treeData).enter()
             .append("g")
             .attr("class", "node")
             .attr("transform", function (d) {
-                // console.log(d.x)
-                // console.log(d.y)
-                // return 'translate(' + d.x + ',' + d.y + ')'
-                // return 'translate(' + d.y + ',' + d.x + ')'
-                return 'translate(' + project(d.x, d.y)[0] + ',' + project(d.x, d.y)[1] + ')'
+                return 'translate(' + d.x + ',' + d.y + ')'
             });
 
         //circulos de los nodos
-        d3.selectAll("g.node")
+        d3.select("#vizVer").selectAll("g.node")
             .append("circle")
             .attr("r", 10)
             .style("fill", d => coloresScale(d.depth))
@@ -94,52 +97,129 @@
 
         //texto
         //notar el texto que se muestra
-        var nodo = d3.selectAll("g.node");
-        nodo.append("text")
-            .style("text-anchor", "middle")
-            .style("fill", "#4f442b")
-            .text(d => d.data.id || d.data.key || d.data.content);
+        const nodo = d3.select("#vizVer").selectAll("g.node");
 
-        nodo.append("rect")
-            .attr("width", function (d, i) {
-
-                console.log(d3.selectAll("text").nodes()[i].getBBox().x);
-                return d3.selectAll("text").nodes()[i].getBBox().width;
-            })
-            .attr("height", 20)
-            .attr("x", (d, i) => d3.selectAll("text").nodes()[i].getBBox().x)
-            .attr("y", (d, i) => d3.selectAll("text").nodes()[i].getBBox().y)
-            .style("fill", "white")
-            .style("opacity", "0.5");
-        d3.selectAll("text").remove()
-        //
         nodo.append("text")
             .style("text-anchor", "middle")
             .style("fill", "#4f442b")
             .text(function (d) {
-                console.log(d.data)
                 return d.data.key || d.data.id || d.data.content
             });
 
-        // d3.select("#treeG").selectAll("line")
-        //     .data(treeData.filter(d => d.parent))
-        //     .enter().insert("line", "g")
-        //     .attr("x1", d => d.parent.x)
-        //     .attr("y1", d => d.parent.y)
-        //     .attr("x2", d => d.x)
-        //     .attr("y2", d => d.y)
-        //     .style("stroke", "black");
+        d3.select("#vizVer").select("#treeG").selectAll("line")
+            .data(treeData.filter(d => d.parent))
+            .enter().insert("line", "g")
+            .attr("x1", d => d.parent.x)
+            .attr("y1", d => d.parent.y)
+            .attr("x2", d => d.x)
+            .attr("y2", d => d.y)
+            .style("stroke", "black");
 
-        // d3.select("#treeG").selectAll("line")
-        //     .data(treeData.filter(d => d.parent))
-        //     .enter().insert("line", "g")
-        //     .attr("x1", d => d.parent.y)
-        //     .attr("y1", d => d.parent.x)
-        //     .attr("x2", d => d.y)
-        //     .attr("y2", d => d.x)
-        //     .style("stroke", "black");
+        d3.select("#vizVer").select("#treeG").selectAll("line")
+            .data(treeData.filter(d => d.parent))
+            .enter().insert("line", "g")
+            .attr("x1", d => d.parent.y)
+            .attr("y1", d => d.parent.x)
+            .attr("x2", d => d.y)
+            .attr("y2", d => d.x)
+            .style("stroke", "black");
+    }
 
-        d3.select("#treeG").selectAll("line")
+    function vizHor(root) {
+
+        //https://github.com/d3/d3-hierarchy/blob/master/README.md#tree
+        //vamos a hacer un arbol
+        const treeChart = d3.tree();
+
+        //tamaño desde el centro
+        treeChart.size([500, 500]);
+
+        //generamos la data necesaria
+        const treeData = treeChart(root).descendants();
+
+        //creamos grupos, dentro de cada grupo pondremos los elementos
+        d3.select('#vizHor')
+            .select("svg")
+            .append("g")
+            .attr("id", "treeG")
+            .attr("transform", "translate(60,20)")
+            .selectAll("g")
+            .data(treeData).enter()
+            .append("g")
+            .attr("class", "node")
+            .attr("transform", function (d) {
+                return 'translate(' + d.y + ',' + d.x + ')'
+            });
+
+        //circulos de los nodos
+        d3.select("#vizHor").selectAll("g.node")
+            .append("circle")
+            .attr("r", 10)
+            .style("fill", d => coloresScale(d.depth))
+            .style("stroke", "white")
+            .style("stroke-width", "2px");
+
+        //texto
+        //notar el texto que se muestra
+        const nodo = d3.select("#vizHor").selectAll("g.node");
+
+        nodo.append("text")
+            .style("text-anchor", "middle")
+            .style("fill", "#4f442b")
+            .text(function (d) {
+                return d.data.key || d.data.id || d.data.content
+            });
+
+        d3.select("#vizHor").select("#treeG").selectAll("line")
+            .data(treeData.filter(d => d.parent))
+            .enter().insert("line", "g")
+            .attr("x1", d => d.parent.y)
+            .attr("y1", d => d.parent.x)
+            .attr("x2", d => d.y)
+            .attr("y2", d => d.x)
+            .style("stroke", "black");
+    }
+
+    function vizAlt(root) {
+
+        //https://github.com/d3/d3-hierarchy/blob/master/README.md#tree
+        //vamos a hacer un arbol
+        const treeChart = d3.tree();
+
+        //tamaño desde el centro
+        treeChart.size([200, 200]);
+
+        //generamos la data necesaria
+        const treeData = treeChart(root).descendants();
+        console.log("treeData:");
+        console.log(treeData);
+        console.log(treeData.filter(d => d.parent));
+
+        //creamos grupos, dentro de cada grupo pondremos los elementos
+        d3.select('#vizAlt')
+            .select("svg")
+            .append("g")
+            .attr("id", "treeG")
+            .attr("transform", "translate(300,300)")
+            .selectAll("g")
+            .data(treeData).enter()
+            .append("g")
+            .attr("class", "node")
+            .attr("transform", function (d) {
+                return 'translate(' + project(d.x, d.y)[0] + ',' + project(d.x, d.y)[1] + ')'
+            });
+
+        //circulos de los nodos
+        d3.select('#vizAlt')
+            .selectAll("g.node")
+            .append("circle")
+            .attr("r", 10)
+            .style("fill", d => coloresScale(d.depth))
+            .style("stroke", "white")
+            .style("stroke-width", "2px");
+
+        //creamos las lineas
+        d3.select('#vizAlt').select("#treeG").selectAll("line")
             .data(treeData.filter(d => d.parent))
             .enter().insert("line", "g")
             .attr("x1", d => project(d.parent.x, d.parent.y)[0])
@@ -148,11 +228,44 @@
             .attr("y2", d => project(d.x, d.y)[1])
             .style("stroke", "black");
 
-        function project(x, y) {
-            var angle = x / 90 * Math.PI;
-            var radius = y;
-            return [radius * Math.cos(angle), radius * Math.sin(angle)];
-        }
+        //texto
+        //notar el texto que se muestra
+        const nodo = d3.select('#vizAlt').selectAll("g.node");
+
+        //creamos texto para saber sus dimensiones
+        nodo.append("text")
+            .style("text-anchor", "middle")
+            .style("fill", "#4f442b")
+            .text(d => d.data.id || d.data.key || d.data.content);
+
+        //creamos rect usando las dimensiones de los textos de arriba
+        nodo.append("rect")
+            .attr("width", function (d, i) {
+                return d3.select('#vizAlt').selectAll("text").nodes()[i].getBBox().width;
+            })
+            .attr("height", 20)
+            .attr("x", (d, i) => d3.selectAll("text").nodes()[i].getBBox().x)
+            .attr("y", (d, i) => d3.selectAll("text").nodes()[i].getBBox().y)
+            .style("fill", "white")
+            .style("opacity", "0.8");
+
+        //borramos los textos, ya que no se ven con los rect
+        d3.select('#vizAlt').selectAll("text").remove()
+
+        //agregamos los textos que veremos
+        nodo.append("text")
+            .style("text-anchor", "middle")
+            .style("fill", "#4f442b")
+            .text(function (d) {
+                console.log(d.data)
+                return d.data.key || d.data.id || d.data.content
+            });
+    }
+
+    function project(x, y) {
+        const angle = x / 90 * Math.PI;
+        const radius = y;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
     }
 </script>
 </body>
