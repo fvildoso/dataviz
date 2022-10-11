@@ -45,7 +45,7 @@
                 Array.from(d3.group(data.tweets, d => d.user), ([key, value]) => ({key, value}))
 
             console.log("nestedTweets:");
-            console.log(JSON.stringify(nestedTweets));
+            console.log(nestedTweets);
 
             //necesitamos que haya un nodo inicial
             const packableTweets = {id: "All Tweets", value: nestedTweets};
