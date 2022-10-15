@@ -1,4 +1,5 @@
 <!doctype html>
+<!--suppress JSUnusedGlobalSymbols, JSUnresolvedVariable, JSUnresolvedFunction -->
 <html lang="es">
 <head>
     <title>D3.js - Music</title>
@@ -11,64 +12,81 @@
 
     <!-- esto es lo que se ve junto al titulo en el tab-->
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <!-- fuente de Google-->
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+
     <style>
         body {
             margin: 0;
             padding: 0;
         }
 
-        .img_takemichi {
+        img {
+            height: 300px;
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 170px;
+        }
+
+        #wrapper {
+            text-align: center;
+            top: 50%;
+            width: 100%;
+            position: absolute;
+        }
+
+        #lyrics {
+            background-color: white;
+            font-family: 'Poppins', sans-serif;
+            opacity: 0.9;
+            display: inline-block;
+            font-size: 30px;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-<!--<div id="panel">-->
-<!--    <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>-->
-<!--    <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>-->
-<!--</div>-->
-<img src="Takemichi.webp" alt="takemichi" class="img_takemichi">
+
+<img src="images/hanako.png" alt="hanako" id="hanako" style="left: 12%; top: 0; transform: rotate(30deg);">
+<img src="images/kabakura.png" alt="kabakura" id="kabakura" style="left: 12%; bottom: 5%;transform: rotate(-30deg)">
+<img src="images/hirotaka.png" alt="hirotaka" id="hirotaka"
+     style="right: 12%; top: 0; transform: scaleX(-1) rotate(30deg)">
+<img src="images/narumi.png" alt="narumi" id="narumi" style="right: 12%; bottom: 5%; transform: rotate(30deg);">
+
+
+<div id="wrapper">
+    <div id="lyrics">
+        ...
+    </div>
+</div>
+
+
 <script>
+
+    // array que contiene la lista de caciones
+    let songs = [
+        'sumika-fiction',
+        'cry-baby',
+        'aot',
+        'digimon'
+    ]
+
+    // la cancion que vamos a usar
+    let currentSong = songs[0]
+
     //https://www.bignerdranch.com/blog/music-visualization-with-d3-js/
     //https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
     d3.select("body")
         .append("audio")
         .attr('controls', true) // esto son los controles que da el navegador por defecto.
         .attr("id", "audioElement")
-        .attr("src", "Cry Baby.mp3")
-    // .attr("src","Attack_on_Titan_S2_ED_transcribed_Yuugure_no_Tori_夕暮れの鳥_Shinsei_Kamattechan_神聖かまってちゃん[Mp3Converter.net].mp3")
-    // .attr("src", "Brave_Heart_triVersion_-_Ayumi_Miyazaki_MV_Digimon_Adventure_Tri[Mp3Converter.net].mp3")
+        .attr("src", 'songs/' + currentSong + ".mp3")
+        .style('position', "absolute")
+        .style('top', "10px")
+        .style('left', "10px")
 
     //guardamos el elemento donde está el audio
     // const audioElement = document.querySelector("#audioElement");
     const audioElement = d3.select("#audioElement").node();
-
-    //creamos boton para darle play
-    // d3.select("#panel")
-    //     .append("button")
-    //     .attr("id", "play")
-    //     .text("Play")
-    //     .on("click", play);
-    //
-    // //creamos boton para darle play
-    // d3.select("#panel")
-    //     .append("button")
-    //     .attr("id", "pause")
-    //     .text("Pause")
-    //     .on("click", pause);
-    //
-    // function play() {
-    //     //necesitamos el DOM element, para eso usamos el node.
-    //     d3.select("#audioElement").node().play();
-    // }
-    //
-    // function pause() {
-    //     //necesitamos el DOM element, para eso usamos el node.
-    //     d3.select("#audioElement").node().pause();
-    // }
 
     //https://developer.mozilla.org/es/docs/Web/API/AudioContext
     //audio context nos sirve para procesar el audio
@@ -86,28 +104,29 @@
 
     //https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Uint8Array
     //representan un array de enteros sin signo de 8 bit
-    // const frequencyData = new Uint8Array(10);
-    const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    const frequencyData = new Uint8Array(10);
+    // const frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
     //creamos el svg
     const svgHeight = window.screen.height - 200;
-    const svgWidth = window.screen.width; //obtenemos el ancho de la pantalla
+    const svgWidth = window.innerWidth; //obtenemos el ancho de la pantalla
     const svg = d3.select("body")
         .append('svg')
         .attr('height', svgHeight)
-        .attr('width', svgWidth);
+        .attr('width', svgWidth)
+        .style("position", "absolute")
+        .style("top", 0)
+        .style("left", 0)
+        .style("z-index", -1)
 
+    // creamos 3 escalas lineales que serán usadas posteriomente
     const frequencyScale = d3.scaleLinear()
         .domain([0, 255])
         .range([0, svgHeight]);
-
-    const colorScale = d3.scaleLinear().domain([0, 1]).range([0, 0.8])
-    // const color = d3.scaleQuantize()
-    //     .domain([0, 255])
-    //     .range(["#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f", "#bf5b17", "#666666"])
+    const colorScale = d3.scaleLinear().domain([0, 0.25]).range([0, 1]) // RMS de Meyda
     const colorScaleTwo = d3.scaleLinear().domain([0, 255]).range([0, 1])
 
-
+    // seperacion entre las barras
     const barPadding = 10; // OJO cuando usen el padding, ya que el ancho siempre tiene que ser positivo
 
     //inicialmente la data son solo ceros para crear los elementos
@@ -118,7 +137,6 @@
         .attr('x', function (d, i) {
             return i * (svgWidth / frequencyData.length) + barPadding;
         })
-        // .attr('width', (svgWidth / frequencyData.length) - barPadding)
         .attr('width', function () {
             const ancho = (svgWidth / frequencyData.length) - barPadding
             return ancho < 0 ? 10 : ancho;
@@ -134,7 +152,8 @@
         //actualizamos los valores de la barra
         svg.selectAll('rect')
             .data(frequencyData)
-            //.transition()
+            // .transition()
+            // .duration(50)
             .attr('y', function (d) {
                 // return svgHeight - d;
                 return svgHeight / 2 - d / 2;
@@ -143,21 +162,85 @@
                 return frequencyScale(d / 2);
             })
             .style('fill', function (d) {
-                // return color(d);
-                return d3.interpolateCool(colorScaleTwo(d));
+                return d3.interpolateCubehelixDefault(colorScaleTwo(d));
             });
     }
 
     //hacemos que se ejecute está funcion de manera continua
     d3.timer(renderChart)
 
+    /*
+    *** Ahora vemos los lyrics :)
+    */
 
-    // meyda
-    // const source = audioContext2.createMediaElementSource(audioElement);
-    // Connect the Audio Node to your speakers. Now that the audio lives in the
-    // Audio Context, you have to explicitly connect it to the speakers in order to
-    // hear it
-    // source.connect(audioContext.destination);
+    // leemos el archivo lrc
+    let arrayLyrics = []
+    d3.text('lyrics/' + currentSong + '.lrc')
+        .then(function (rawData) {
+
+            //hacemos un split por línea del archivo
+            rawData.split(/\r?\n/).forEach(function (d) {
+
+                let split = d.split(']')
+                if (split.length > 1 && split[1].length > 0) {
+
+                    //calculamos el tiempo en el que deberia aparecer
+                    let tempTime = split[0].substring(1).split(":")
+                    let realTime = parseFloat(tempTime[1]) + parseInt(tempTime[0]) * 60
+
+                    // esto es lo que realmente usaremos del archivo
+                    arrayLyrics.push({time: realTime, lyric: split[1]})
+                }
+            })
+        })
+        .catch(function (e) {
+            console.log(e)
+        })
+
+    // hacemos que la posicion del div que tiene las lyrics quede centrado
+    d3.select('#wrapper')
+        .style('top', svgHeight / 2 - d3.select('#wrapper').node().offsetHeight / 2 + "px")
+
+    // añadiremos funciones cuando se le de play y pause a la canción
+    d3.select("#audioElement")
+        .on("play", play)
+        .on("pause", pause);
+
+    // timers guardará todos los eventos en los que cambia la letra que se muestra
+    let timers = []
+
+    // esta variables nos servirá para guardar en que momento de la cancion estamos
+    // sirve para el momento NO inicial
+    let currentTime = 0
+
+    // esta funcion creará los eventos que mostraran las letras
+    function play() {
+        currentTime = audioSrc.mediaElement.currentTime * 1000
+        arrayLyrics.forEach(function (d) {
+
+            if (d.time >= audioSrc.mediaElement.currentTime) {
+                timers.push(
+                    d3.timer(function () {
+                        d3.select('#lyrics')
+                            .html(d.lyric)
+                    }, d.time * 1000 - currentTime)
+                )
+            }
+        })
+    }
+
+    // con esto borramos todos los eventos que tenemos en timers
+    function pause() {
+        timers.forEach(function (d) {
+            d.stop()
+        })
+        timers = []
+    }
+
+
+    /*
+    *** Meyda 👀
+    */
 
     //https://meyda.js.org/audio-features
     if (typeof Meyda === "undefined") {
@@ -172,8 +255,10 @@
                 d3.select('body')
                     .transition()
                     .duration(100)
-                    .style('background-color', d3.interpolateCubehelixDefault(colorScale(features.rms)))
-                // console.log(features);
+                    .style(
+                        'background-color',
+                        d3.interpolateRgb.gamma(2.2)("#fff1f2", "#ffa4bd")(colorScale(features.rms))
+                    )
             },
         });
         analyzer.start();
