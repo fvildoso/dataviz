@@ -9,3 +9,9 @@ circle.cities {
     stroke: #4F442B;
     fill: #FCBC34;
 }
+
+path.graticule {
+    fill: none;
+    stroke-width: 1;
+    stroke: lightgray;
+}

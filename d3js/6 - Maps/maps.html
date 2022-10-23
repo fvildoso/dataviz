@@ -65,7 +65,6 @@
         //definimos nuestro geoPath, lo que queremos dibujar
         const geoPath = d3.geoPath().projection(projection);
 
-        //geoArea nos da el área dado un GeoJson
         //extent nos devuelve el mínimo y máximo valor
         const realFeatureSize = d3.extent(poblacion, function (d) {
             return +d.cantidad
@@ -99,15 +98,6 @@
                 return newFeatureColor(poblacionEncontrada)
             })
             .style("stroke", d => d3.rgb(newFeatureColor(d3.geoArea(d))).darker());
-
-        //generamos la "grilla"
-        // const graticule = d3.geoGraticule();
-        //
-        // //dibujamos la grilla
-        // d3.select("#geoOrthographic1").insert("path", "path.countries")
-        //     .datum(graticule)
-        //     .attr("class", "graticule line")
-        //     .attr("d", geoPath);
 
         const zoom = d3.zoom()
             .scaleExtent([1, 8])
@@ -196,14 +186,14 @@
             .attr('width', 100)
             .attr('height', 100)
 
-        // //generamos la "grilla"
-        // const graticule = d3.geoGraticule();
-        //
-        // //dibujamos la grilla
-        // d3.select("#geoOrthographic2").insert("path", "path.countries")
-        //     .datum(graticule)
-        //     .attr("class", "graticule line")
-        //     .attr("d", geoPath);
+        //generamos la "grilla"
+        const graticule = d3.geoGraticule();
+
+        //dibujamos la grilla
+        d3.select("#geoOrthographic2").insert("path", "path.countries")
+            .datum(graticule)
+            .attr("class", "graticule line")
+            .attr("d", geoPath);
 
         const zoom = d3.zoom()
             .scaleExtent([1, 8])
