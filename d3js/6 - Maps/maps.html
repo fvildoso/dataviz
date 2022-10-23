@@ -5,7 +5,7 @@
     <title>D3.js - Mapas</title>
     <meta charset="utf-8"/>
 
-    <!-- esto es lo que se ve junto al titulo en el tab-->
+    <!-- esto es lo que se ve junto al título en el tab-->
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
 
     <!--	d3 😍-->
@@ -19,9 +19,11 @@
 </head>
 
 <body>
+
 <div id="viz1">
     <svg id="geoOrthographic1"></svg>
 </div>
+
 <div id="viz2">
     <svg id="geoOrthographic2"></svg>
 </div>
@@ -31,19 +33,20 @@
     //Nos sirve para poder cargar los archivos y luego ejecutar createMap
     Promise
         .all([
-            d3.json("world.geojson"),
-            d3.csv('cities.csv'),
-            d3.json('rm.geojson')
+            d3.json("mapas/world.geojson"),
+            d3.csv('data/cities.csv'),
+            d3.json('mapas/curico.geojson'),
+            d3.csv('data/curico_poblacion.csv')
         ])
         .then(resolve => {
 
-            createMap1(resolve[2]);
+            createMap1(resolve[2], resolve[3]);
 
             createMap2(resolve[0], resolve[1]);
         });
 
     //creamos el mapa1
-    function createMap1(countries) {
+    function createMap1(mapa, poblacion) {
 
         const viz1 = d3.select("#viz1");
         const ancho = viz1.style("width").substring(0, viz1.style("width").length - 2) - 10;
@@ -54,62 +57,40 @@
         //https://github.com/d3/d3-geo-projection#geoConicEqualArea
         const projection = d3.geoMercator()
             //que tan cercano
-            .scale(11000)
+            .scale(16000)
             // .translate([ancho / 2, 250])
             //desde el centro, lo podemos mover
-            .center([-71.5, -33.5]);
+            .center([-71.8, -35.2]);
 
         //definimos nuestro geoPath, lo que queremos dibujar
         const geoPath = d3.geoPath().projection(projection);
 
-        //solo datos
-        const poblacion = [
-            {comuna: "Curicó", cantidad: 125275},
-            {comuna: "Hualañé", cantidad: 9657},
-            {comuna: "Licantén", cantidad: 6653},
-            {comuna: "Molina", cantidad: 45976},
-            {comuna: "Rauco", cantidad: 10484},
-            {comuna: "Romeral", cantidad: 15187},
-            {comuna: "Sagrada Familia", cantidad: 18544},
-            {comuna: "Teno", cantidad: 28921},
-            {comuna: "Vichuquén", cantidad: 4322},
-        ];
-
-        //geoArea nos da el area dado un GeoJson
-        //extent nos devuelve el minimo y maximo valor
+        //geoArea nos da el área dado un GeoJson
+        //extent nos devuelve el mínimo y máximo valor
         const realFeatureSize = d3.extent(poblacion, function (d) {
             return +d.cantidad
         });
         console.log("Mínimo y Máximo: ");
         console.log(realFeatureSize);
 
-        //hacemos un escala para los colores
-        //veamos cual es el rango
+        //hacemos una escala para los colores
         //https://github.com/d3/d3-scale#scaleQuantize
         const newFeatureColor = d3.scaleQuantize()
             .domain(realFeatureSize)
-            .range(colorbrewer.BuPu[7]);
+            .range(colorbrewer.Purples[7]);
 
-        //Nada nuevo, aqui hacemos el dibujo
+        //Nada nuevo, aquí hacemos el dibujo
         d3.select("#geoOrthographic1").selectAll("path")
-            .data(countries.features).enter()
+            .data(mapa.features).enter()
             .append("path")
             .attr("d", geoPath)
             .attr("id", d => d.id)
             .attr("class", "countries")
             .style("fill", d => {
 
-                //comentar la linea de abajo para ver que hace el resto
-                // return "grey"
-
-                console.log(d.properties.NOM_COM);
-
+                // buscamos la poblacion para una comuna dada
                 let poblacionEncontrada;
                 poblacion.forEach(function (e) {
-                    console.log(d.properties.NOM_COM);
-                    console.log(e.comuna);
-
-
                     if (e.comuna === d.properties.NOM_COM) {
                         poblacionEncontrada = e.cantidad;
                     }
@@ -139,7 +120,7 @@
     }
 
     //creamos el mapa2
-    function createMap2(countries, cities) {
+    function createMap2(mapa, cities) {
 
         const viz1 = d3.select("#viz2");
         const ancho = viz1.style("width").substring(0, viz1.style("width").length - 2) - 10;
@@ -159,24 +140,23 @@
         const geoPath = d3.geoPath().projection(projection_2);
 
         //features es un array con cada pais
-        const featureData = countries.features;
+        const featureData = mapa.features;
 
-        //geoArea nos da el area dado un GeoJson
-        //extent nos devuelve el minimo y maximo valor
+        //geoArea nos da el área dado un GeoJson
+        //extent nos devuelve el mínimo y máximo valor
         const realFeatureSize = d3.extent(featureData, d => d3.geoArea(d));
         console.log("Mínimo y Máximo: ");
         console.log(realFeatureSize);
 
-        //hacemos un escala para los colores
-        //veamos cual es el rango
+        //hacemos una escala para los colores
         //https://github.com/d3/d3-scale#scaleQuantize
         const newFeatureColor = d3.scaleQuantize()
             .domain(realFeatureSize)
-            .range(colorbrewer.BuPu[7]);
+            .range(colorbrewer.Greys[7]);
 
-        //Nada nuevo, aqui hacemos el dibujo
+        //Nada nuevo, aquí hacemos el dibujo
         d3.select("#geoOrthographic2").selectAll("path")
-            .data(countries.features).enter()
+            .data(mapa.features).enter()
             .append("path")
             .attr("d", geoPath)
             .attr("id", d => d.id)
@@ -185,7 +165,6 @@
                 return newFeatureColor(d3.geoArea(d))
             })
             .style("stroke", d => d3.rgb(newFeatureColor(d3.geoArea(d))).darker());
-
 
         //dibujamos las ciudades
         d3.select("#geoOrthographic2").selectAll("circle")
@@ -208,11 +187,10 @@
                 return d.label
             });
 
-
         d3.select("#geoOrthographic2").selectAll("images")
             .data(cities).enter()
             .append("svg:image")
-            .attr("xlink:href", "http://pngimg.com/uploads/pokemon/pokemon_PNG154.png")
+            .attr("xlink:href", "https://pngimg.com/uploads/pokemon/pokemon_PNG154.png")
             .attr("x", d => projection_2([d.x, d.y])[0])
             .attr("y", d => projection_2([d.x, d.y])[1])
             .attr('width', 100)
