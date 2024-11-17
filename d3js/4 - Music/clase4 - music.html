@@ -88,19 +88,62 @@
     // const audioElement = document.querySelector("#audioElement");
     const audioElement = d3.select("#audioElement").node();
 
-    //https://developer.mozilla.org/es/docs/Web/API/AudioContext
-    //audio context nos sirve para procesar el audio
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let audioContext = null;
+    let audioSrc = null;
+    let analyser = null;
 
-    //indicamos la fuente, tiene que ser un elemento del DOM
-    const audioSrc = audioContext.createMediaElementSource(audioElement);
+    // Función para inicializar el contexto de audio
+    function initAudioContext() {
+        if (!audioContext) {
 
-    //sirve para tener el tiempo y la frecuencia
-    const analyser = audioContext.createAnalyser();
+            //https://developer.mozilla.org/es/docs/Web/API/AudioContext
+            //audio context nos sirve para procesar el audio
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Vincula nuestro analizador a la fuente.
-    audioSrc.connect(analyser);
-    audioSrc.connect(audioContext.destination);
+            //indicamos la fuente, tiene que ser un elemento del DOM
+            audioSrc = audioContext.createMediaElementSource(audioElement);
+
+            //sirve para tener el tiempo y la frecuencia
+            analyser = audioContext.createAnalyser();
+
+            // Vincula nuestro analizador a la fuente.
+            audioSrc.connect(analyser);
+            audioSrc.connect(audioContext.destination);
+        } else if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }
+
+    // Se inicializa solo cuando el usuario interactúa
+    audioElement.addEventListener('play', () => {
+        initAudioContext();
+
+        /*
+*** Meyda 👀
+*/
+
+        //https://meyda.js.org/audio-features
+        if (typeof Meyda === "undefined") {
+            console.log("Meyda could not be found! Have you included it?");
+        } else {
+            const analyzer = Meyda.createMeydaAnalyzer({
+                audioContext: audioContext,
+                source: audioSrc,
+                bufferSize: 512 * 2 * 4,
+                featureExtractors: ["rms"],
+                callback: (features) => {
+                    d3.select('body')
+                        .transition()
+                        .duration(100)
+                        .style(
+                            'background-color',
+                            d3.interpolateRgb.gamma(2.2)("#fff1f2", "#ffa4bd")(colorScale(features.rms))
+                        )
+                },
+            });
+            analyzer.start();
+        }
+    }, {once: true});
 
     //https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Uint8Array
     //representan un array de enteros sin signo de 8 bit
@@ -145,6 +188,7 @@
 
     //creamos la funcion que actualiza las barras
     function renderChart() {
+        if (!analyser) return;
 
         //obtenemos la frecuencia y se la damos al array
         analyser.getByteFrequencyData(frequencyData);
@@ -236,34 +280,6 @@
         })
         timers = []
     }
-
-
-    /*
-    *** Meyda 👀
-    */
-
-    //https://meyda.js.org/audio-features
-    if (typeof Meyda === "undefined") {
-        console.log("Meyda could not be found! Have you included it?");
-    } else {
-        const analyzer = Meyda.createMeydaAnalyzer({
-            audioContext: audioContext,
-            source: audioSrc,
-            bufferSize: 512 * 2 * 4,
-            featureExtractors: ["rms"],
-            callback: (features) => {
-                d3.select('body')
-                    .transition()
-                    .duration(100)
-                    .style(
-                        'background-color',
-                        d3.interpolateRgb.gamma(2.2)("#fff1f2", "#ffa4bd")(colorScale(features.rms))
-                    )
-            },
-        });
-        analyzer.start();
-    }
-
 
 </script>
 </body>
