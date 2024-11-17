@@ -151,7 +151,7 @@
     // const frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
     //creamos el svg
-    const svgHeight = window.screen.height - 200;
+    const svgHeight = window.innerHeight;
     const svgWidth = window.innerWidth; //obtenemos el ancho de la pantalla
     const svg = d3.select("body")
         .append('svg')
@@ -200,10 +200,10 @@
             // .duration(50)
             .attr('y', function (d) {
                 // return svgHeight - d;
-                return svgHeight / 2 - d / 2;
+                return svgHeight / 2 - frequencyScale(d) / 2;
             })
             .attr('height', function (d) {
-                return frequencyScale(d / 2);
+                return frequencyScale(d);
             })
             .style('fill', function (d) {
                 return d3.interpolateCubehelixDefault(colorScaleTwo(d));
