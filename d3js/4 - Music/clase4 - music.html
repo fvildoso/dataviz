@@ -200,10 +200,10 @@
             // .duration(50)
             .attr('y', function (d) {
                 // return svgHeight - d;
-                return svgHeight / 2 - frequencyScale(d) / 2;
+                return svgHeight / 2 - frequencyScale(d) / 4;
             })
             .attr('height', function (d) {
-                return frequencyScale(d);
+                return frequencyScale(d) / 2;
             })
             .style('fill', function (d) {
                 return d3.interpolateCubehelixDefault(colorScaleTwo(d));
