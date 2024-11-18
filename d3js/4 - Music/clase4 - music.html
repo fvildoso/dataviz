@@ -62,6 +62,8 @@
 
 <script>
 
+    let isPlaying = false;
+
     // array que contiene la lista de caciones
     let songs = [
         'sumika-fiction',
@@ -165,7 +167,7 @@
     // creamos 3 escalas lineales que serán usadas posteriomente
     const frequencyScale = d3.scaleLinear()
         .domain([0, 255])
-        .range([0, svgHeight]);
+        .range([0, svgHeight / 2]);
     const colorScale = d3.scaleLinear().domain([0, 0.25]).range([0, 1]) // RMS de Meyda
     const colorScaleTwo = d3.scaleLinear().domain([0, 255]).range([0, 1])
 
@@ -185,10 +187,9 @@
             return ancho < 0 ? 10 : ancho;
         })
 
-
     //creamos la funcion que actualiza las barras
     function renderChart() {
-        if (!analyser) return;
+        if (!isPlaying || !analyser) return;
 
         //obtenemos la frecuencia y se la damos al array
         analyser.getByteFrequencyData(frequencyData);
@@ -200,10 +201,10 @@
             // .duration(50)
             .attr('y', function (d) {
                 // return svgHeight - d;
-                return svgHeight / 2 - frequencyScale(d) / 4;
+                return svgHeight / 2 - frequencyScale(d) / 2;
             })
             .attr('height', function (d) {
-                return frequencyScale(d) / 2;
+                return frequencyScale(d);
             })
             .style('fill', function (d) {
                 return d3.interpolateCubehelixDefault(colorScaleTwo(d));
@@ -247,8 +248,15 @@
 
     // añadiremos funciones cuando se le de play y pause a la canción
     d3.select("#audioElement")
-        .on("play", play)
-        .on("pause", pause);
+        .on("play", function () {
+            isPlaying = true;
+            rotateAlbum();
+            play();
+        })
+        .on("pause", function () {
+            isPlaying = false;
+            pause();
+        });
 
     // timers guardará todos los eventos en los que cambia la letra que se muestra
     let timers = []
